@@ -1,0 +1,126 @@
+---
+// 迁移自原型的 renderFacets()：八组分面，Colour 一组带圆形色块。
+// 首屏用 renderFacetsMarkup(items, {}) 直接算出真实计数（未选中任何条件），
+// 交互之后 catalog-page.ts 用同一份函数重新渲染，两边共享一份实现、不会走样。
+import { renderFacetsMarkup } from '../scripts/catalog-page';
+import type { CatalogItem } from '../lib/catalog';
+
+interface Props {
+  items: CatalogItem[];
+}
+
+const { items } = Astro.props;
+const html = renderFacetsMarkup(items, {});
+---
+<aside class="facets" id="facets" set:html={html} />
+
+<style is:global>
+  /*
+    这里的规则用 is:global：#facets 的内容会被 catalog-page.ts 整块替换
+    （每次筛选变化都是 innerHTML 重写），Astro 的作用域样式属性只会出现在
+    编译期就存在的标记上，客户端重新拼出来的 HTML 拿不到那个属性，
+    scoped 样式在交互之后就会失效——所以这里的选择器必须是全局的。
+  */
+  aside.facets {
+    position: sticky;
+    /* 结果栏也吸顶（top: --header-h），分面栏必须落在它下面，
+       否则第一组标题会被结果栏的 --paper 底色盖掉。 */
+    top: calc(var(--header-h) + var(--rbar-h) + 10px);
+    max-height: calc(100vh - var(--header-h) - var(--rbar-h) - 30px);
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  aside.facets::-webkit-scrollbar {
+    width: 6px;
+  }
+  aside.facets::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 3px;
+  }
+
+  .fgroup {
+    border-bottom: 1px solid var(--line-2);
+    padding: 2px 0 14px;
+    margin-bottom: 14px;
+  }
+  .fgroup:last-child {
+    border-bottom: 0;
+  }
+  .fgroup > .eyebrow {
+    display: block;
+    margin-bottom: 10px;
+  }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 4px 0;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .opt:hover {
+    color: var(--ink);
+  }
+  .opt input {
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--ink-3);
+    border-radius: 1px;
+    flex: none;
+    background: var(--surface);
+    position: relative;
+    cursor: pointer;
+  }
+  .opt input:checked {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .opt input:checked::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 1px;
+    width: 3px;
+    height: 6px;
+    border: solid var(--surface);
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(42deg);
+  }
+  .opt.on {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .opt .n {
+    margin-left: auto;
+    font-size: 11.5px;
+    color: var(--ink-3);
+  }
+  .opt.zero {
+    opacity: 0.38;
+    pointer-events: none;
+  }
+  .sw {
+    width: 13px;
+    height: 13px;
+    flex: none;
+    border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
+    border-radius: 50%;
+  }
+
+  @media (max-width: 900px) {
+    aside.facets {
+      position: static;
+      max-height: none;
+      display: none;
+      border: 1px solid var(--line);
+      padding: 18px;
+      margin-bottom: 24px;
+      background: var(--surface);
+    }
+    aside.facets.open {
+      display: block;
+    }
+  }
+</style>

@@ -1,0 +1,40 @@
+:root{
+  color-scheme: light;
+
+  --paper:#FBFAF8;
+  --surface:#FFFFFF;
+  --ink:#1A1917;
+  --ink-2:#6B675E;
+  --ink-3:#959086;
+  --line:#E4E0D8;
+  --line-2:#F0EDE7;
+  --accent:#24379B;
+  --accent-soft:#EDEFF9;
+  --wall:#D7D2C8;
+  --floor:#B9B0A2;
+
+  /* View in a Room 家具插画配色（仅供 ViewInRoom.astro 的沙发/台灯 SVG 引用） */
+  --skirt:#EDE9E2;
+  --sofa-body:#8E8C84;
+  --sofa-arm:#7D7B73;
+  --sofa-seat:#9B998F;
+  --sofa-seam:#8A887F;
+  --sofa-foot:#5C554A;
+  --lamp-shade:#C8B78E;
+  --lamp-pole:#6E665A;
+
+  --f-display:"Libre Caslon Display", Georgia, "Times New Roman", serif;
+  --f-title:"Libre Caslon Text", Georgia, serif;
+  --f-ui:"Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  --gut:24px;
+  --maxw:1440px;
+
+  /* 吸顶元素的高度。页面上有三处 position:sticky 的 top 需要绕开站点头部
+     （详情页右栏、品类页的分面栏与结果栏），全部从这两个 token 推出来，
+     不要再各自写一个魔数——之前三处分别写成 64/120/124，结果栏被头部盖住。
+     --header-h = SiteHeader 的 64px 顶栏 + 44px 品类栏 + 上下两条 1px 分隔线
+     --rbar-h   = ResultsBar 的 16px + 34px 控件 + 16px + 1px 下边框 */
+  --header-h:110px;
+  --rbar-h:67px;
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+.superpowers/
+.env
+.env.*
+
+# 设计说明、实施计划与结项交接记录：本地保留，不进仓库
+docs/superpowers/

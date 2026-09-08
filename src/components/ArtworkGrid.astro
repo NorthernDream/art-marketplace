@@ -1,0 +1,61 @@
+---
+// 网格本身只负责铺卡片；真正把画布画出来的活儿在客户端脚本里，
+// 组件挂载后调用一次 paintGrid 铺满首屏，再用 watchResize 在窗口变化时重绘。
+import type { CatalogItem } from '../lib/catalog';
+import ArtworkCard from './ArtworkCard.astro';
+
+interface Props {
+  items: CatalogItem[];
+}
+
+const { items } = Astro.props;
+---
+<div class="grid" id="grid">
+  {items.map((item) => <ArtworkCard item={item} />)}
+</div>
+
+<script>
+  import { paintGrid, layoutMasonry, watchResize } from '../scripts/paint-grid';
+  paintGrid();
+  watchResize();
+  // 首次量高度时网页字体多半还没换上，回退字体下艺术家名会多折一行，
+  // 卡片被量高约 18px，跨度就永久偏大，同列相邻卡片之间出现莫名的空档。
+  // 字体就位后重算一次跨度即可——此时画布尺寸没变，不必重画。
+  document.fonts?.ready.then(() => layoutMasonry());
+</script>
+
+<style>
+  /* 瀑布流（挡板式）：列宽固定，行高切成 4px 的细格，每张卡片按自己的真实高度
+     占若干格——跨度由 paint-grid.ts 的 layoutMasonry 在画完布之后量出来写进去。
+     align-items:start 是必须的：网格项默认会拉伸填满自己的行跨度，那样量出来的
+     就是跨度高度而不是内容高度，跨度会一轮轮自我放大。
+     行间距不用 row-gap，而是折进跨度计算里（--card-gap），否则 4px 的细格
+     会被 gap 撑成 4+gap 的步长，跨度算不准。 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-auto-rows: 2px;
+    align-items: start;
+    column-gap: 30px;
+    row-gap: 0;
+    --card-gap: 44px;
+  }
+  /* JS 跑起来之前的兜底跨度（约 400px），免得卡片全挤成 2px 高互相重叠 */
+  .grid :global(.card) {
+    grid-row-end: span 200;
+  }
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      column-gap: 22px;
+      --card-gap: 36px;
+    }
+  }
+  @media (max-width: 620px) {
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      column-gap: 16px;
+      --card-gap: 28px;
+    }
+  }
+</style>

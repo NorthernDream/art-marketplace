@@ -1,0 +1,52 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import PromoBar from '../components/PromoBar.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  /**
+   * 更宽的页面（如带侧栏筛选的品类页）。这个覆盖必须落在 <body> 上而不是 <main> 上：
+   * 头部与页脚是 body 的兄弟节点，只改 main 的话 1440px 以上头部/页脚仍是 1440，
+   * 而正文已经 1680，页面标题就会和站点字标错开一截。
+   */
+  wide?: boolean;
+}
+
+const { title, description, wide = false } = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    {description && <meta name="description" content={description} />}
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;1,400&display=swap"
+    />
+  </head>
+  <body class:list={['site-body', { 'site-body--wide': wide }]}>
+    <PromoBar />
+    <SiteHeader />
+    <main class="site-main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
+
+<style>
+  .site-main {
+    display: block;
+  }
+  .site-body--wide {
+    --maxw: 1680px;
+  }
+</style>

@@ -1,0 +1,191 @@
+---
+// 迁移自原型 cardHTML()：一张卡片 = 挂画区（画布 + 收藏 + 一键看房）+ 信息区。
+//
+// 与原型的一处刻意偏差：原型把整张卡片包在 <a class="card"> 里，同时把 "View in
+// a Room" 也做成 <a class="inroom">。HTML 不允许一个 <a> 嵌套在另一个未闭合的
+// <a> 里——解析器会用"adoption agency"算法提前把外层 <a> 关闭，导致挂画区之后
+// 的信息区(.meta)反而不在任何链接里，"整卡可点"就假了。这里改用"伸展链接"手
+// 法：外层用 <article>，真正的 <a> 只挂在标题上，再用 ::after 把它的可点区域
+// 撑满整张卡片；收藏按钮与"看房"链接各自设更高的 z-index，保证悬浮态下仍可点。
+//
+// 与 catalog-page.ts 的 buildCard 有一份约定：客户端筛选/排序/翻页时会克隆这份
+// 标记再填数据，只允许改 textContent、不允许新建元素——新建的节点拿不到 Astro
+// 的作用域属性，下面这些 scoped 规则就会失配。因此
+// 1) 艺术家名与价格各自包在自己的 <span> 里，让脚本有现成的节点可写；
+// 2) "Curator's Pick" 无论是不是精选都渲染出来，用 hidden 切换，
+//    这样克隆出来的卡片总是带着这枚标签，不用在客户端凭空造一个。
+import type { CatalogItem } from '../lib/catalog';
+import { placeholderColor } from '../lib/art/render';
+import { usd, dimensionsShort, editionLabel } from '../lib/format';
+
+interface Props {
+  item: CatalogItem;
+}
+
+const { item } = Astro.props;
+const isPick = item.popularity >= 88;
+const detailHref = `/artwork/${item.slug}`;
+---
+<article class="card">
+  <div class="wall pbox" data-fill>
+    <canvas data-artwork-id={item.id} style={`background:${placeholderColor(item)}`}></canvas>
+    <button class="heart" type="button" aria-label={`Save ${item.title}`}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-9a4 4 0 017-2.6A4 4 0 0119 11c0 4.6-7 9-7 9z"/></svg>
+    </button>
+    <a class="inroom" href={`${detailHref}?view=room`}>View in a Room</a>
+  </div>
+  <div class="meta">
+    <span class="tagline" hidden={!isPick}>Curator&rsquo;s Pick</span>
+    <p class="t"><a class="titlelink" href={detailHref}>{item.title}</a></p>
+    <p class="a"><span>{item.artistName}</span> <i>&middot; {item.country}</i></p>
+    <p class="d num">{dimensionsShort(item.widthIn, item.heightIn)} &middot; {item.medium}</p>
+    <p class="p num"><span>{usd(item.priceUsd)}</span><small>{editionLabel(item.edition)}</small></p>
+  </div>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    width: 100%;
+  }
+  /* 瀑布流：画布撑满列宽，高度由作品长宽比决定，卡片高度随之而变。
+     不再固定高度——固定高度会把所有卡片拉齐，那就退回普通网格了。
+     真实相对比例改在详情页与 View in a Room 里表达（那里有沙发作参照）。 */
+  .wall {
+    position: relative;
+    display: block;
+  }
+  .wall canvas {
+    display: block;
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--ink) 22%, transparent),
+      3px 4px 12px color-mix(in srgb, var(--ink) 14%, transparent);
+    transition: box-shadow 0.25s ease;
+  }
+  .card:hover .wall canvas {
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--ink) 26%, transparent),
+      5px 8px 22px color-mix(in srgb, var(--ink) 20%, transparent);
+  }
+  .heart {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    color: var(--ink-2);
+    z-index: 2;
+  }
+  .card:hover .heart,
+  .heart:focus-visible {
+    opacity: 1;
+  }
+  .inroom {
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    transform: translateX(-50%);
+    background: var(--surface);
+    border: 1px solid var(--ink);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 2;
+  }
+  .card:hover .inroom,
+  .inroom:focus-visible {
+    opacity: 1;
+  }
+  .meta {
+    padding-top: 10px;
+    border-top: 1px solid var(--line-2);
+    margin-top: 8px;
+  }
+  .meta .t {
+    font-family: var(--f-title);
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.25;
+    margin: 0 0 2px;
+  }
+  .titlelink {
+    color: inherit;
+    text-decoration: none;
+  }
+  .titlelink::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .card:hover .titlelink {
+    text-decoration: underline;
+  }
+  /* 整卡是"伸展链接"的真实点击区，键盘焦点框也要画在整张卡片上，
+     而不是画在被撑大的标题文字周围——否则焦点框和实际可激活区域对不上。 */
+  .titlelink:focus-visible {
+    outline: none;
+  }
+  .card:has(.titlelink:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  @supports not selector(:has(a)) {
+    .card:focus-within {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+  }
+  /* 艺术家名是标题之后第二重要的信息，之前和尺寸、版数一样是灰的，
+     三行灰叠在一起整块塌下去。名字提到正文色，只让国别保持弱化。 */
+  .meta .a {
+    font-size: 12.5px;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .meta .a i {
+    font-style: normal;
+    color: var(--ink-3);
+  }
+  .meta .d {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    margin: 0 0 5px;
+  }
+  .meta .p {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .meta .p small {
+    font-weight: 400;
+    color: var(--ink-3);
+    font-size: 11.5px;
+    margin-left: 6px;
+  }
+  .tagline {
+    display: inline-block;
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  /* .tagline 自己声明了 display，会盖掉浏览器默认的 [hidden]{display:none}，
+     非精选作品的这枚标签必须在这里显式收起来。 */
+  .tagline[hidden] {
+    display: none;
+  }
+</style>

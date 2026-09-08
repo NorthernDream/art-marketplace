@@ -1,0 +1,99 @@
+---
+// View in a Room 场景：迁移自原型的 roomHTML()。
+// 只负责场景的标记与样式；把英寸换算成像素的 layoutRoom() 算法住在
+// ../scripts/artwork-page.ts 里，页面加载与切换标签时由它调用。
+import { placeholderColor } from '../lib/art/render';
+import { dimensions } from '../lib/format';
+import type { Artwork } from '../lib/data/types';
+
+interface Props {
+  artwork: Artwork;
+}
+
+const { artwork } = Astro.props;
+---
+<div class="room">
+  <div class="floorband"></div>
+  <div class="skirt"></div>
+  <svg class="sofa" viewBox="0 0 84 33" preserveAspectRatio="none" aria-hidden="true">
+    <rect class="sofa-body" x="4" y="1" width="76" height="19" rx="3" />
+    <rect class="sofa-arm" x="0" y="9" width="9" height="19" rx="3.5" />
+    <rect class="sofa-arm" x="75" y="9" width="9" height="19" rx="3.5" />
+    <rect class="sofa-seat" x="6" y="16" width="72" height="12" rx="3" />
+    <path class="sofa-seam" d="M42 16.6v11.2" stroke-width=".7" />
+    <rect class="sofa-foot" x="9" y="27.6" width="3" height="5" />
+    <rect class="sofa-foot" x="72" y="27.6" width="3" height="5" />
+  </svg>
+  <svg class="lamp" viewBox="0 0 20 62" preserveAspectRatio="none" aria-hidden="true">
+    <path class="lamp-shade" d="M4 12h12l2.6 10H1.4z" />
+    <rect class="lamp-pole" x="9.2" y="22" width="1.6" height="36" />
+    <ellipse class="lamp-pole" cx="10" cy="59" rx="6.5" ry="1.8" />
+  </svg>
+  <div class="art"><canvas style={`background:${placeholderColor(artwork)}`}></canvas></div>
+</div>
+<div class="caption">
+  <span>Shown to scale — sofa is 84 in / 213 cm wide</span>
+  <span class="num">{dimensions(artwork.widthIn, artwork.heightIn)} on the wall</span>
+</div>
+
+<style>
+  /* 房间比例算法（layoutRoom）把这里的每个元素都换算成同一个 k 的像素值，
+     样式本身只负责外观，绝不写死任何一个元素的尺寸。 */
+  .room {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--wall);
+  }
+  .room .floorband {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--floor);
+  }
+  .room .skirt {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--skirt);
+    opacity: 0.85;
+  }
+  .room .art {
+    position: absolute;
+    box-shadow:
+      0 2px 0 color-mix(in srgb, var(--ink) 28%, transparent),
+      8px 12px 26px color-mix(in srgb, var(--ink) 26%, transparent);
+  }
+  .room .art canvas {
+    display: block;
+  }
+  .room svg {
+    position: absolute;
+    display: block;
+  }
+  .sofa-body {
+    fill: var(--sofa-body);
+  }
+  .sofa-arm {
+    fill: var(--sofa-arm);
+  }
+  .sofa-seat {
+    fill: var(--sofa-seat);
+  }
+  .sofa-seam {
+    fill: none;
+    stroke: var(--sofa-seam);
+  }
+  .sofa-foot {
+    fill: var(--sofa-foot);
+  }
+  .lamp-shade {
+    fill: var(--lamp-shade);
+  }
+  .lamp-pole {
+    fill: var(--lamp-pole);
+  }
+  /* .caption 的排版在 styles/base.css 里，与详情页作品大图下的说明行共用 */
+</style>

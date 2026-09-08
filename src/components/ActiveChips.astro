@@ -1,0 +1,48 @@
+---
+// 迁移自原型的 renderChips()：每个已选条件一枚可移除的标签，末尾 Clear all。
+// 与 FacetRail 同样的原因，这里也用共享的 renderChipsMarkup，且样式必须是全局的——
+// 交互后 catalog-page.ts 会整块重写 #chips 的内容。
+import { renderChipsMarkup } from '../scripts/catalog-page';
+---
+<div class="chips" id="chips" set:html={renderChipsMarkup({})} />
+
+<style is:global>
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 0 0;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--surface));
+    border-radius: 2px;
+    padding: 5px 8px 5px 10px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .chip button {
+    color: var(--accent);
+    line-height: 1;
+    font-size: 14px;
+    opacity: 0.7;
+  }
+  .chip button:hover {
+    opacity: 1;
+  }
+  .chips .clear {
+    background: none;
+    border: 0;
+    color: var(--ink-2);
+    font-size: 12px;
+    text-decoration: underline;
+    padding: 5px 4px;
+  }
+  .chips .clear:hover {
+    color: var(--ink);
+  }
+</style>

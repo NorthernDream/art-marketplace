@@ -1,0 +1,266 @@
+---
+// 艺术家主页：40 位各生成一个静态页面。
+//
+// 页面上的数字（作品数、材质、题材、价格区间、年份跨度）全部由 artistFacts()
+// 从作品数据算出，不在页面里写死——数据一变页面跟着变，也能单独测。
+//
+// bio 与 statement 是两种口吻：前者第三人称介绍这个人，后者第一人称讲作品。
+// 两段同屏出现，所以在 artists.test.ts 里有守卫盯着它们不要退回同一个模板。
+import Base from '../../layouts/Base.astro';
+import ArtworkGrid from '../../components/ArtworkGrid.astro';
+import { ARTISTS, artistBySlug } from '../../lib/data/artists';
+import { artistFacts } from '../../lib/artist';
+import { usd } from '../../lib/format';
+
+export function getStaticPaths() {
+  return ARTISTS.map((artist) => ({ params: { slug: artist.slug } }));
+}
+
+const { slug } = Astro.params;
+const artist = artistBySlug(slug!);
+if (!artist) {
+  // getStaticPaths 与 ARTISTS 同源，理论上不会走到这里
+  throw new Error(`未找到 slug 为 "${slug}" 的艺术家`);
+}
+const facts = artistFacts(artist.id);
+if (!facts) {
+  throw new Error(`艺术家 ${artist.id} 没有任何作品`);
+}
+
+const priceRange =
+  facts.priceLow === facts.priceHigh
+    ? usd(facts.priceLow)
+    : `${usd(facts.priceLow)} – ${usd(facts.priceHigh)}`;
+const yearRange =
+  facts.earliestYear === facts.latestYear
+    ? String(facts.latestYear)
+    : `${facts.earliestYear}–${facts.latestYear}`;
+---
+<Base
+  title={`${artist.name} — VELIN`}
+  description={`Original works by ${artist.name}, ${artist.city}, ${artist.country}.`}
+>
+  <div class="wrap profile">
+    <div class="crumbs">
+      <a href="/">Home</a> / {artist.name}
+    </div>
+
+    <header class="phead">
+      <div>
+        <span class="eyebrow">{artist.city}, {artist.country}</span>
+        <h1>{artist.name}</h1>
+        <p class="meta">
+          <span class="num">{facts.workCount}</span> {facts.workCount === 1 ? 'work' : 'works'}
+          &middot; joined <span class="num">{artist.joinedYear}</span>
+          &middot; <span class="num">{artist.followers.toLocaleString('en-US')}</span> followers
+        </p>
+      </div>
+      <button type="button" class="btn" id="followArtist">Follow</button>
+    </header>
+
+    <div class="body">
+      <div class="words">
+        <p class="bio">{artist.bio}</p>
+        <h2>In the artist&rsquo;s words</h2>
+        <p class="statement">{artist.statement}</p>
+
+        <h2>Selected exhibitions</h2>
+        <ul class="exhibitions">
+          {artist.exhibitions.map((entry) => <li>{entry}</li>)}
+        </ul>
+      </div>
+
+      <aside class="facts">
+        <dl>
+          <div><dt>Works available</dt><dd class="num">{facts.workCount}</dd></div>
+          <div><dt>Price range</dt><dd class="num">{priceRange}</dd></div>
+          <div><dt>Made</dt><dd class="num">{yearRange}</dd></div>
+          <div><dt>Media</dt><dd>{facts.mediums.join(', ')}</dd></div>
+          <div><dt>Subjects</dt><dd>{facts.subjects.join(', ')}</dd></div>
+        </dl>
+      </aside>
+    </div>
+
+    <section class="works">
+      <h2>
+        Works by {artist.name}
+        <span class="count num">{facts.workCount}</span>
+      </h2>
+      <ArtworkGrid items={facts.works} />
+    </section>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</Base>
+
+<script>
+  // Follow 在 Phase 1 只给一句反馈，没有状态层——与详情页的 Add to Cart 一致。
+  const btn = document.querySelector<HTMLElement>('#followArtist');
+  const toast = document.querySelector<HTMLElement>('#toast');
+  let timer: number | undefined;
+  btn?.addEventListener('click', () => {
+    if (!toast) return;
+    toast.textContent = 'Following — you’ll hear when new work is listed';
+    toast.classList.add('on');
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => toast.classList.remove('on'), 2400);
+  });
+</script>
+
+<style>
+  .profile {
+    padding: 24px var(--gut) 80px;
+  }
+  .phead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 10px 0 26px;
+    border-bottom: 1px solid var(--line);
+  }
+  .phead h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 44px;
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    margin: 8px 0 10px;
+    text-wrap: balance;
+  }
+  .phead .meta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
+  /* 两栏成对靠左，而不是各自贴住页面两边：文字栏限宽 62ch，若让它占满 1fr
+     再把事实栏推到最右，中间会空出四百多像素的洞。 */
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 62ch) minmax(240px, 300px);
+    justify-content: start;
+    gap: 72px;
+    align-items: start;
+    padding: 32px 0 44px;
+    border-bottom: 1px solid var(--line);
+  }
+  .words h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 20px;
+    margin: 30px 0 10px;
+  }
+  .bio {
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    margin: 0;
+  }
+  /* 自述是第一人称，用作品名同一款斜体衬线，和第三人称的介绍区分开 */
+  .statement {
+    font-family: var(--f-title);
+    font-style: italic;
+    font-size: 16.5px;
+    line-height: 1.7;
+    color: var(--ink);
+    margin: 0;
+  }
+  .exhibitions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .exhibitions li {
+    font-size: 13px;
+    color: var(--ink-2);
+    padding-left: 14px;
+    position: relative;
+  }
+  .exhibitions li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 5px;
+    height: 1px;
+    background: var(--ink-3);
+  }
+
+  .facts dl {
+    margin: 0;
+    border-top: 1px solid var(--line);
+  }
+  .facts div {
+    display: flex;
+    gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .facts dt {
+    width: 118px;
+    flex: none;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding-top: 2px;
+  }
+  .facts dd {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink);
+  }
+
+  .works {
+    padding-top: 44px;
+  }
+  .works h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 24px;
+    margin: 0 0 26px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .works .count {
+    font-family: var(--f-ui);
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translate(-50%, 20px);
+    z-index: 80;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 20px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+  #toast.on {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  @media (max-width: 900px) {
+    .body {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
+    }
+    .phead h1 {
+      font-size: 34px;
+    }
+  }
+</style>

@@ -1,0 +1,65 @@
+---
+// 404 页：找不到路由时的落地页。视觉语言沿用品类页的抬头（chead）与空结果提示（empty），
+// 只提供回到三个已上线品类的入口——Photography、Sculpture 尚未上线，不在这里出现。
+import Base from '../layouts/Base.astro';
+import { PRIMARY_NAV } from '../lib/nav';
+
+const liveCategories = PRIMARY_NAV.filter((item) => item.live && item.href !== '/');
+---
+<Base title="Page Not Found — VELIN" description="This page could not be found.">
+  <div class="wrap">
+    <div class="notfound">
+      <span class="eyebrow">404</span>
+      <h1>This page isn&rsquo;t hanging here.</h1>
+      <p>
+        The page you followed may have moved, or the link was mistyped. Here&rsquo;s where you
+        can keep browsing.
+      </p>
+      <div class="links">
+        <a class="btn solid" href="/">Back to Home</a>
+        {liveCategories.map((item) => (
+          <a class="btn" href={item.href}>{item.label}</a>
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .notfound {
+    padding: 96px 0 120px;
+    text-align: center;
+    max-width: 52ch;
+    margin: 0 auto;
+  }
+  .eyebrow {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 38px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 14px;
+  }
+  p {
+    color: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
+  .links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  /* .btn / .btn.solid 的样式在 styles/base.css 里 */
+</style>

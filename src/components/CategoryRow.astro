@@ -1,0 +1,79 @@
+---
+// 迁移自原型的 .catrow：Shop by category 的五个品类格。
+// 与原型的一处刻意偏差：未上线的品类原型里仍是一个指向 "#" 的 <a>（因为整个原型
+// 是假路由的单页应用，随便一个占位 href 都行）。这里没有真实目的地可去，改成不带
+// href 的 <span>——和 SiteHeader.astro 里 "Coming soon" 的 <li> 用的是同一个道理：
+// 没有落点的东西不该是链接。
+interface CategoryTile {
+  label: string;
+  href: string;
+  live: boolean;
+  count: number;
+}
+
+interface Props {
+  categories: CategoryTile[];
+}
+
+const { categories } = Astro.props;
+---
+<div class="catrow">
+  {categories.map((c) =>
+    c.live ? (
+      <a href={c.href}>
+        <b>{c.label}</b>
+        <em><span class="num">{c.count}</span> works available</em>
+      </a>
+    ) : (
+      <span class="tile soon">
+        <b>{c.label}</b>
+        <em>Coming soon</em>
+      </span>
+    )
+  )}
+</div>
+
+<style>
+  .catrow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--line);
+  }
+  .catrow a,
+  .catrow .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 20px 18px 20px 0;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line-2);
+  }
+  .catrow > :last-child {
+    border-right: 0;
+  }
+  .catrow a:hover {
+    background: var(--surface);
+  }
+  .catrow b {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 20px;
+  }
+  .catrow em {
+    font-style: normal;
+    font-size: 11.5px;
+    color: var(--ink-3);
+  }
+  .catrow .soon {
+    opacity: 0.5;
+  }
+
+  @media (max-width: 900px) {
+    .catrow {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .catrow > :nth-child(2n) {
+      border-right: 0;
+    }
+  }
+</style>

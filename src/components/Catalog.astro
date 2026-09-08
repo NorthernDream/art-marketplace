@@ -1,0 +1,113 @@
+---
+// 品类列表页的组装层：抬头 + 结果栏 + 已选标签 + (筛选栏 + 网格) + 分页区。
+// 数据在这里一次性建好并交给客户端脚本。服务端只把默认状态下真正会显示的第一页
+// （PAGE_SIZE 张、未筛选、curated 顺序）铺成网格并画好——这已经是一份完整、非空壳
+// 的目录视图；客户端脚本收到的是全量数据，筛选/排序/翻页都在浏览器里对全量数据操作。
+import { ARTWORKS } from '../lib/data/artworks';
+import { ARTISTS } from '../lib/data/artists';
+import { buildCatalog } from '../lib/catalog';
+import type { CatalogItem } from '../lib/catalog';
+import type { Category } from '../lib/data/types';
+import { PAGE_SIZE } from '../scripts/catalog-page';
+import ArtworkGrid from './ArtworkGrid.astro';
+import FacetRail from './FacetRail.astro';
+import ResultsBar from './ResultsBar.astro';
+import ActiveChips from './ActiveChips.astro';
+
+interface Props {
+  category: Category;
+  title: string;
+  blurb: string;
+}
+
+const { category, title, blurb } = Astro.props;
+const items: CatalogItem[] = buildCatalog(ARTWORKS, ARTISTS).filter((item) => item.category === category);
+const firstPage = items.slice(0, PAGE_SIZE);
+
+// 交给客户端脚本的数据——是上面这份目录的全量（不是首屏铺的那一页），序列化成 JSON
+// 内嵌进页面，避免脚本重新拉一遍数据，也避免转义不当截断 </script>。
+const dataJson = JSON.stringify(items).replace(/</g, '\\u003c');
+---
+<div class="wrap">
+  <div class="chead">
+    <p class="crumbs"><a href="/">Home</a> / <a href="/">Art</a> / {title}</p>
+    <h1>{title}</h1>
+    <p>{blurb}</p>
+  </div>
+
+  <ResultsBar count={items.length} />
+  <ActiveChips />
+
+  <div class="browse">
+    <FacetRail items={items} />
+    <section>
+      <ArtworkGrid items={firstPage} />
+      <div class="more" id="more"></div>
+    </section>
+  </div>
+</div>
+
+<script type="application/json" id="catalog-data" set:html={dataJson} />
+<script>
+  import { initCatalogPage } from '../scripts/catalog-page';
+  import type { CatalogItem } from '../lib/catalog';
+
+  const raw = document.getElementById('catalog-data')?.textContent ?? '[]';
+  const items = JSON.parse(raw) as CatalogItem[];
+  initCatalogPage(items);
+</script>
+
+<style>
+  /* .chead / .crumbs 的排版在 styles/base.css 里，品类页与 Coming soon 页共用 */
+  .browse {
+    display: grid;
+    grid-template-columns: 212px minmax(0, 1fr);
+    gap: 44px;
+    padding: 28px 0 72px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .browse {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+    }
+  }
+</style>
+
+<style is:global>
+  /*
+    #more 的内容全部由 catalog-page.ts 生成（Load more 按钮 / 到底提示 / 空状态），
+    跟 FacetRail、ActiveChips 一样的原因，这里也必须是全局样式。
+  */
+  .more {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0 0;
+  }
+  /* 滚动加载的哨兵：滚到它就自动续下一批。写着「正在加载」而不是留白，
+     免得用户以为已经到底了。真正到底时这里换成收尾那句话。 */
+  .more .sentinel {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+    padding: 8px 0 24px;
+  }
+  .more .rcount {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .empty {
+    padding: 80px 0;
+    text-align: center;
+    color: var(--ink-2);
+    width: 100%;
+  }
+  .empty h3 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 24px;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+</style>

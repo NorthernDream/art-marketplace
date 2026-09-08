@@ -1,0 +1,52 @@
+---
+// photography.astro 和 sculpture.astro 共用的"尚未上线"页面主体：
+// 沿用品类页的抬头排版，主体换成 Coming soon 说明和回到已上线品类的入口。
+interface Props {
+  title: string;
+  blurb: string;
+}
+
+const { title, blurb } = Astro.props;
+---
+<div class="wrap">
+  <div class="chead">
+    <p class="crumbs"><a href="/">Home</a> / {title}</p>
+    <h1>{title}</h1>
+    <p>{blurb}</p>
+  </div>
+
+  <div class="soon">
+    <h3>Coming soon</h3>
+    <p>In the meantime, browse what&rsquo;s already live.</p>
+    <div class="links">
+      <a class="btn" href="/paintings">Paintings</a>
+      <a class="btn" href="/drawings">Drawings</a>
+      <a class="btn" href="/prints">Prints</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* .chead / .crumbs / .btn 的排版都在 styles/base.css 里 */
+  .soon {
+    padding: 64px 0 96px;
+    text-align: center;
+  }
+  .soon h3 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 24px;
+    margin: 0 0 10px;
+    color: var(--ink);
+  }
+  .soon p {
+    color: var(--ink-2);
+    margin: 0 0 22px;
+  }
+  .links {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>

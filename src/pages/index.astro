@@ -1,0 +1,479 @@
+---
+// 首页：迁移自原型的 homeView()。八个小节按顺序拼装，具体到每一节的取舍见下方注释。
+import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
+import CategoryRow from '../components/CategoryRow.astro';
+import ArtworkGrid from '../components/ArtworkGrid.astro';
+import ViewInRoom from '../components/ViewInRoom.astro';
+import { ARTWORKS } from '../lib/data/artworks';
+import { ARTISTS, artistById } from '../lib/data/artists';
+import { buildCatalog, filterItems, sortItems, SIZE_ORDER, PRICE_ORDER } from '../lib/catalog';
+import type { CatalogItem, Selection } from '../lib/catalog';
+import { PRIMARY_NAV } from '../lib/nav';
+import { dimensions } from '../lib/format';
+import { placeholderColor } from '../lib/art/render';
+
+const CATALOG: CatalogItem[] = buildCatalog(ARTWORKS, ARTISTS);
+const PAINTINGS: CatalogItem[] = CATALOG.filter((item) => item.category === 'painting');
+const PRINTS: CatalogItem[] = CATALOG.filter((item) => item.category === 'print');
+
+function itemById(id: string): CatalogItem {
+  const item = CATALOG.find((i) => i.id === id);
+  if (!item) throw new Error(`首页引用了不存在的作品 ${id}`);
+  return item;
+}
+
+/** 把筛选条件序列化成查询串，供合集卡片/价格入口把预置筛选带进对应品类页 */
+function categoryHref(base: string, selection: Selection): string {
+  const params = new URLSearchParams();
+  for (const [key, values] of Object.entries(selection)) {
+    for (const value of values ?? []) params.append(key, value);
+  }
+  return `${base}?${params.toString()}`;
+}
+
+// "Under $1,000" 是一句承诺，链接必须落在承诺成立的地方。Paintings 70 件里只有 3 件
+// 在这个价位，把 Hero 按钮/First Purchases 卡片指去 /paintings 会让首页最显眼的两个
+// 入口都落进近乎空的结果页；Prints 25 件里有 22 件在这个价位，承诺在这里是真的。
+const AFFORDABLE_SELECTION: Selection = { price: [PRICE_ORDER[0]!] };
+const affordableHref = categoryHref('/prints', AFFORDABLE_SELECTION);
+
+// ---------- 1. 主视觉：固定挑 w011（34×44in 的海景画）。原型挑的是同一位艺术家的
+// w013，但那件只有 18×18in，displaySize 按真实尺寸换算后在 432px 高的墙上只占
+// 约 158px——整页讲的是"尺寸是真的"，主视觉却是一面几乎空着的墙。换成同题材、
+// 同笔法的 44in 一件，Large (40–60 in) 档，画面把展示墙撑起来。----------
+const heroArt = itemById('w011');
+
+// ---------- 3. Shop by category：品类是否已上线来自 PRIMARY_NAV（Task 10），
+// 每个已上线品类的作品数由目录现算，不写死 ----------
+const categoryCounts: Record<string, number> = {
+  '/paintings': PAINTINGS.length,
+  '/drawings': CATALOG.filter((item) => item.category === 'drawing').length,
+  '/prints': CATALOG.filter((item) => item.category === 'print').length
+};
+const categories = PRIMARY_NAV.filter((item) => item.href !== '/').map((item) => ({
+  label: item.label,
+  href: item.href,
+  live: item.live,
+  count: categoryCounts[item.href] ?? 0
+}));
+
+// ---------- 4. Curator's picks：popularity >= 88 里最受欢迎的四件 ----------
+const picks = sortItems(
+  CATALOG.filter((item) => item.popularity >= 88),
+  'popular'
+).slice(0, 4);
+
+// ---------- 5. View in a Room：与原型一致，固定挑 w035（34×56in 的大幅人物画，
+// 与沙发的比例关系最能体现"按真实尺寸摆进房间"这件事）----------
+const roomArt = itemById('w035');
+const roomArtJson = JSON.stringify(roomArt).replace(/</g, '\\u003c');
+
+// ---------- 6. Collections：Blue Hour 与 Statement Scale 是 Paintings 内部的筛选，
+// 链接到 /paintings；First Purchases 和 Hero 的第二个按钮一样是"under $1,000"这句
+// 承诺，链接到 Prints（22/25 件在售价下符合，而不是 Paintings 的 3/70）。
+// 命中数量都按各自目录现算，不写死。----------
+const COLLECTIONS: { name: string; blurb: string; base: string; catalog: CatalogItem[]; selection: Selection }[] = [
+  {
+    name: 'Blue Hour',
+    blurb: 'Cool, quiet works for rooms that get a lot of light.',
+    base: '/paintings',
+    catalog: PAINTINGS,
+    selection: { color: ['Blue'] }
+  },
+  {
+    name: 'First Purchases',
+    blurb: 'Original prints under $1,000 — an easy, low-risk way to start collecting.',
+    base: '/prints',
+    catalog: PRINTS,
+    selection: AFFORDABLE_SELECTION
+  },
+  {
+    name: 'Statement Scale',
+    blurb: 'Large canvases built to hold a wall on their own.',
+    base: '/paintings',
+    catalog: PAINTINGS,
+    selection: { size: [SIZE_ORDER[3]!, SIZE_ORDER[4]!] }
+  }
+];
+const collections = COLLECTIONS.map((c) => ({
+  ...c,
+  href: categoryHref(c.base, c.selection),
+  count: filterItems(c.catalog, c.selection).length
+}));
+
+// ---------- 7. 价格区间快捷入口：链接到 /paintings 不变——一个价位区间本来就有薄有厚，
+// 这是"按价格浏览"该有的真实信息，不是承诺落空。把每档命中数量现算出来挂在按钮上，
+// 让访客点进去之前就知道会看到几件，而不是被"Under $1,000"这几个字单独拎出来误导。
+// ----------
+const priceBands = PRICE_ORDER.map((band) => ({
+  band,
+  href: categoryHref('/paintings', { price: [band] }),
+  count: filterItems(PAINTINGS, { price: [band] }).length
+}));
+
+// ---------- 8. Artists to follow：四位艺术家，各自的代表作决定了这块画布画什么。
+// 原型这里第一位挂的是 w001，但 w001 同时是 popularity 最高的几件之一，会出现在
+// 上面的 Curator's picks 里——同一张画在首页出现两次，隔着约 600px。改挂 w022，
+// 它的艺术家（a16）也不在精选那四件里。----------
+const FEATURED_ARTIST_WORK_IDS = ['w022', 'w017', 'w025', 'w032'];
+const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
+---
+<Base title="VELIN — Original Art, Direct From the Studio" description="Paintings by independent artists in 84 countries — each one an original, priced by the artist who made it.">
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Original art, direct from the studio</span>
+        <h1>Every wall deserves something <em>no one else has.</em></h1>
+        <p>
+          Paintings by independent artists in 84 countries — each one an original, priced by the
+          artist who made it, shipped with a certificate of authenticity and 14 days to change
+          your mind.
+        </p>
+        <div class="cta">
+          <a class="btn solid" href="/paintings">Browse Paintings</a>
+          <a class="btn" href={affordableHref}>Under $1,000</a>
+        </div>
+      </div>
+      <div>
+        <!-- 这个 canvas 靠 data-artwork-id + .pbox 这套约定被本页下方 ArtworkGrid
+             自带脚本里那次文档级 paintGrid() 一并画出来，不需要再单独调一次。 -->
+        <div class="herowall pbox" data-pad="38">
+          <canvas data-artwork-id={heroArt.id} style={`background:${placeholderColor(heroArt)}`}></canvas>
+        </div>
+        <!-- 尺寸整段不许折行：1440 下 "cm" 会被甩到第二行，读起来像少写了一个单位 -->
+        <p class="herocap"><em>{heroArt.title}</em> &middot; {heroArt.artistName} &middot; <span class="num dim">{dimensions(heroArt.widthIn, heroArt.heightIn)}</span></p>
+      </div>
+    </section>
+
+    <div class="trust">
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        Certificate of authenticity with every work
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        Free worldwide shipping, insured in transit
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        14-day returns, no questions
+      </span>
+      <span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        The artist sets the price and keeps the majority
+      </span>
+    </div>
+
+    <section class="sec">
+      <SectionHead title="Shop by category" />
+      <CategoryRow categories={categories} />
+    </section>
+
+    <section class="sec">
+      <SectionHead
+        title="Curator&rsquo;s picks"
+        blurb="Chosen this week by our curatorial team from new studio submissions."
+        linkLabel="See all"
+        linkHref="/paintings"
+      />
+      <ArtworkGrid items={picks} />
+    </section>
+
+    <section class="roomband">
+      <div>
+        <span class="eyebrow">View in a Room</span>
+        <h2>See how big it really is, before it arrives.</h2>
+        <p>
+          Every work can be placed on a wall at true scale, measured against a standard
+          three-seat sofa. What you see is the actual size relationship — not an illustration.
+        </p>
+        <a class="btn" href={`/artwork/${roomArt.slug}?view=room`}>Try it on this work</a>
+      </div>
+      <div>
+        <ViewInRoom artwork={roomArt} />
+      </div>
+    </section>
+
+    <section class="sec">
+      <SectionHead
+        title="Collections"
+        blurb="Ready-made edits, for when you&rsquo;d rather not start from a blank filter."
+      />
+      <div class="colls">
+        {collections.map((c) => (
+          <a class="coll" href={c.href}>
+            <b>{c.name}</b>
+            <span>{c.blurb}</span>
+            <span class="n"><span class="num">{c.count}</span> works</span>
+          </a>
+        ))}
+      </div>
+      <div class="pricerow">
+        {priceBands.map((p) => (
+          <a href={p.href}>{p.band} <span class="n">(<span class="num">{p.count}</span>)</span></a>
+        ))}
+      </div>
+    </section>
+
+    <section class="sec">
+      <SectionHead title="Artists to follow" />
+      <!-- 同样是 data-artwork-id + .pbox 的约定，画布由下面 Curator's picks 那次
+           文档级 paintGrid() 一起画出来。
+           卡片指向艺术家主页而不是那件作品——这一栏推的是人，不是画。 -->
+      <div class="artists">
+        {featuredArtists.map((item) => (
+          <a class="artist" href={`/artist/${artistById(item.artistId)!.slug}/`}>
+            <span class="pbox" data-pad="18">
+              <canvas data-artwork-id={item.id} style={`background:${placeholderColor(item)}`}></canvas>
+            </span>
+            <b>{item.artistName}</b>
+            <em>{item.country} &middot; {item.style}</em>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+</Base>
+
+<script>
+  import { layoutRoom } from '../scripts/artwork-page';
+  import type { Artwork } from '../lib/data/types';
+
+  const raw = document.getElementById('room-data')?.textContent ?? 'null';
+  const artwork = JSON.parse(raw) as Artwork | null;
+  const room = document.querySelector<HTMLElement>('.roomband .room');
+  if (artwork && room) {
+    layoutRoom(room, artwork);
+    let resizeTimer: number | undefined;
+    window.addEventListener('resize', () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => layoutRoom(room, artwork), 160);
+    });
+  }
+</script>
+<script type="application/json" id="room-data" set:html={roomArtJson} />
+
+<style>
+  /* 主视觉：高度完全由内容撑开（herowall 是固定 432px 的展示框，不是视口高度），
+     不用 100vh——这样首屏顶多显示到 Trust strip，不会因为视口更矮就把 Hero 切掉。 */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 56px;
+    align-items: center;
+    padding: 54px 0 60px;
+  }
+  .hero .eyebrow {
+    display: block;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 53px;
+    line-height: 1.03;
+    letter-spacing: -0.015em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+  .hero h1 em {
+    font-family: var(--f-title);
+    font-style: italic;
+  }
+  .hero p {
+    font-size: 15.5px;
+    color: var(--ink-2);
+    line-height: 1.62;
+    max-width: 46ch;
+    margin: 0 0 28px;
+  }
+  .hero .cta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .herowall {
+    background: var(--wall);
+    height: 432px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .herowall canvas {
+    box-shadow:
+      0 2px 0 color-mix(in srgb, var(--ink) 26%, transparent),
+      10px 16px 34px color-mix(in srgb, var(--ink) 24%, transparent);
+  }
+  /* 必须写成 .hero .herocap：只写 .herocap 的话优先级低于上面的 .hero p，
+     整条图注会被当成正文（15.5px、ink-2、max-width 46ch），在 1440 下被那条
+     max-width 折成两行、"cm" 单独掉到第二行。 */
+  .hero .herocap {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    line-height: 1.5;
+    max-width: none;
+    margin-top: 10px;
+    text-align: right;
+  }
+  .herocap .dim {
+    white-space: nowrap;
+  }
+
+  .trust {
+    display: flex;
+    gap: 42px;
+    flex-wrap: wrap;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--ink-2);
+  }
+  .trust span {
+    display: flex;
+    gap: 9px;
+    align-items: center;
+  }
+  .trust svg {
+    color: var(--accent);
+    flex: none;
+  }
+
+  .sec {
+    padding: 54px 0 0;
+  }
+
+  .roomband {
+    display: grid;
+    grid-template-columns: 0.82fr 1.18fr;
+    gap: 52px;
+    align-items: center;
+    padding: 58px 0;
+    margin-top: 54px;
+    border-top: 1px solid var(--line);
+  }
+  .roomband h2 {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 30px;
+    margin: 0 0 14px;
+    line-height: 1.12;
+  }
+  .roomband p {
+    color: var(--ink-2);
+    line-height: 1.65;
+    margin: 0 0 18px;
+    max-width: 44ch;
+  }
+
+  .colls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .coll {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 26px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 7px;
+  }
+  .coll:hover {
+    border-color: var(--ink);
+  }
+  .coll b {
+    font-family: var(--f-display);
+    font-weight: 400;
+    font-size: 23px;
+  }
+  .coll span {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .coll .n {
+    font-size: 11.5px;
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+  .pricerow {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .pricerow a {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    padding: 9px 16px;
+    font-size: 12.5px;
+  }
+  .pricerow a:hover {
+    border-color: var(--ink);
+  }
+  .pricerow .n {
+    color: var(--ink-3);
+  }
+
+  .artists {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+  }
+  .artist {
+    display: block;
+    text-align: left;
+  }
+  .artist .pbox {
+    height: 152px;
+    background: var(--wall);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .artist .pbox canvas {
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--ink) 24%, transparent),
+      4px 6px 14px color-mix(in srgb, var(--ink) 18%, transparent);
+  }
+  .artist b {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .artist em {
+    font-style: normal;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+
+  /* .btn / .btn.solid 的样式在 styles/base.css 里 */
+
+  @media (max-width: 1080px) {
+    .artists {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 900px) {
+    .hero,
+    .roomband {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 30px;
+    }
+    .hero h1 {
+      font-size: 40px;
+    }
+    .herowall {
+      height: 330px;
+    }
+    .colls {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

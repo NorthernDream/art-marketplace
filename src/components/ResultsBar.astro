@@ -1,0 +1,178 @@
+---
+// 迁移自原型的 .rbar：结果数、排序下拉与窄屏才出现的 Filters 折叠按钮。
+// 这三块本身不会被客户端整体重写——脚本只改 textContent/属性——所以样式照常用 scoped。
+interface Props {
+  count: number;
+}
+
+const { count } = Astro.props;
+---
+<div class="rbar">
+  <button type="button" id="filterToggle">Filters</button>
+  <span class="rcount"><b class="num" id="result-count">{count}</b> works</span>
+  <div class="sp"></div>
+  {/*
+    自绘下拉，不用原生 <select> 的弹层。
+    原生弹层由浏览器绘制，位置与字号不归页面管：真机、DevTools 设备模拟、
+    不同系统各画各的，出过「弹层偏位、选项字号不对」的问题，页面这边也无从修。
+    自绘的面板是普通 DOM，位置、字号、配色全部可控，各端表现一致。
+
+    隐藏的 <select> 仍在，作为排序状态的载体，catalog-page.ts 照旧读它的 value、
+    听它的 change，行为逻辑一行不用改。
+  */}
+  <div class="sortish">
+    <button type="button" class="sorttrigger" id="sortTrigger"
+            aria-haspopup="listbox" aria-expanded="false" aria-controls="sortMenu">
+      <span class="lbl">Sort</span>
+      <span class="value" id="sort-value">Curated</span>
+      <svg class="chev" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+    <ul class="sortmenu" id="sortMenu" role="listbox" aria-label="Sort works" hidden>
+      <li role="option" data-value="curated" aria-selected="true" tabindex="-1">Curated</li>
+      <li role="option" data-value="newest" aria-selected="false" tabindex="-1">Newest</li>
+      <li role="option" data-value="popular" aria-selected="false" tabindex="-1">Most Popular</li>
+      <li role="option" data-value="price-asc" aria-selected="false" tabindex="-1">Price: Low to High</li>
+      <li role="option" data-value="price-desc" aria-selected="false" tabindex="-1">Price: High to Low</li>
+    </ul>
+    <select id="sort" aria-hidden="true" tabindex="-1">
+      <option value="curated">Curated</option>
+      <option value="newest">Newest</option>
+      <option value="popular">Most Popular</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+    </select>
+  </div>
+</div>
+
+<script>
+  // 与 --header-h 同理：筛选栏吸顶时要落在结果栏下面，而结果栏的高度会随
+  // 窄屏换行而变。按实测高度写回 --rbar-h，别让 FacetRail 去猜。
+  const rbar = document.querySelector<HTMLElement>('.rbar');
+  if (rbar) {
+    const sync = () => {
+      const h = Math.round(rbar.getBoundingClientRect().height);
+      if (h > 0) document.documentElement.style.setProperty('--rbar-h', `${h}px`);
+    };
+    sync();
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(sync).observe(rbar);
+    document.fonts?.ready.then(sync);
+  }
+</script>
+
+<style>
+  .rbar {
+    /* 紧贴站点头部下沿：头部高度写在 --header-h 里，不要再猜一个数字 */
+    position: sticky;
+    top: var(--header-h);
+    z-index: 30;
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .rcount {
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+  .rcount b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .sp {
+    margin-left: auto;
+  }
+  .sortish {
+    position: relative;
+  }
+  /* 隐藏的状态载体：只存值，不参与布局，也不进 tab 序 */
+  .sortish select {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sorttrigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    height: 34px;
+    padding: 0 10px 0 12px;
+    border-radius: 2px;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .sorttrigger:hover {
+    border-color: var(--ink-3);
+  }
+  .sorttrigger .lbl {
+    color: var(--ink-2);
+  }
+  .sorttrigger .value {
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .sorttrigger .chev {
+    flex: none;
+    color: var(--ink-2);
+    transition: transform 0.15s ease;
+  }
+  .sorttrigger[aria-expanded='true'] .chev {
+    transform: rotate(180deg);
+  }
+  .sortmenu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 5;
+    min-width: 100%;
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--ink) 14%, transparent);
+  }
+  .sortmenu li {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--ink-2);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .sortmenu li:hover,
+  .sortmenu li:focus {
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+  }
+  .sortmenu li[aria-selected='true'] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .sorttrigger:focus-visible,
+  .sortmenu li:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  #filterToggle {
+    display: none;
+    border: 1px solid var(--ink);
+    height: 34px;
+    padding: 0 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    #filterToggle {
+      display: inline-flex;
+      align-items: center;
+    }
+  }
+</style>
