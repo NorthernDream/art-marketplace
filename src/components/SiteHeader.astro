@@ -16,7 +16,7 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
       </form>
       <!--
         Sign In / Favorites / Cart 要到 Phase 3 才有落地页（spec §9 的
-        localStorage 状态层）。原来它们是指向 # 的死链，点了什么都不发生。
+        localStorage 状态层）。原来它们是 href="#" 的死链，点了什么都不发生。
         改成非链接元素：图标与购物车 0 徽标保留（它们表达「这是一个市场」
         这件事），但不再伪装成可点。清单见 lib/nav.ts 的 DECORATIVE_LINKS，
         spec §12 要求装饰性链接必须列明。

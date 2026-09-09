@@ -78,6 +78,19 @@ function sourceFiles(dir: string): string[] {
   return out;
 }
 
+/**
+ * 注释不算数：扫描前先剥掉。
+ * 否则一条解释「原来它们是 href="#" 的死链」的注释会被当成死链本身，
+ * 而修法就变成把注释改写得不像话去迁就扫描器，本末倒置。
+ * .astro 里三种注释都要剥：HTML 注释、块注释、行注释（URL 里的 // 前有冒号，不剥）。
+ */
+function stripComments(source: string): string {
+  return source
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
+
 describe('装饰性链接', () => {
   /**
    * spec §12 的验收标准：导航与页脚无死链，装饰性链接除外且必须在功能清单中列明。
@@ -88,7 +101,7 @@ describe('装饰性链接', () => {
     const offenders: string[] = [];
     for (const dir of ['components', 'pages', 'layouts']) {
       for (const file of sourceFiles(join(SRC, dir))) {
-        const body = readFileSync(file, 'utf8');
+        const body = stripComments(readFileSync(file, 'utf8'));
         if (body.includes('href="#"')) offenders.push(file.slice(SRC.length));
       }
     }
@@ -104,12 +117,23 @@ describe('装饰性链接', () => {
     }
   });
 
-  it('清单里的每条都能在它声明的组件里找到', () => {
+  it('清单里的每条都能在它声明的组件里落地', () => {
     for (const d of DECORATIVE_LINKS) {
       const file = join(SRC, 'components', `${d.where}.astro`);
       expect(existsSync(file), `${d.where}.astro 不存在`).toBe(true);
-      const body = readFileSync(file, 'utf8');
-      expect(body.includes(d.label), `${d.where}.astro 里找不到 ${d.label}`).toBe(true);
+      // 注释里出现不算数，所以先剥注释：否则把标签写进注释的组件也能过，
+      // 那时守卫盯的是注释而不是渲染结果。
+      const body = stripComments(readFileSync(file, 'utf8'));
+      // 两种落地方式都算数：
+      // 1) 标签字面写在标记里（SiteHeader 的三个图标）
+      // 2) 组件消费 DECORATIVE_LINKS 自己渲染（SiteFooter 的三条法务链接）
+      //    这种情况下标签必然与清单一致，因为它就是从清单取的。
+      const literal = body.includes(d.label);
+      const fromManifest = body.includes('DECORATIVE_LINKS');
+      expect(
+        literal || fromManifest,
+        `${d.where}.astro 既没有字面量 ${d.label}，也没有消费 DECORATIVE_LINKS`
+      ).toBe(true);
     }
   });
 });
