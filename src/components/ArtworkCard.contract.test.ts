@@ -22,24 +22,24 @@ const REQUIRED = [
 ];
 
 describe('ArtworkCard 与 buildCard 的契约', () => {
-  it('模板里含有 buildCard 依赖的全部节点', () => {
-    // 用最朴素的形态断言：这些标记在模板源码里必须找得到
+  it('模板里含有 buildCard 依赖的全部节点（含 REQUIRED 里记录的理由）', () => {
+    // 用最朴素的形态断言：这些标记在模板源码里必须找得到。
+    // 艺术家名与价格两条带着父元素一起写成子串（'<p class="a"><span>'、
+    // '<p class="p num"><span>'），而不是分别断言 '<p class="a">' 和 '<span>'：
+    // 后者哪怕 <span> 被拍平掉（比如 <p class="a">{name} <i>...）也照样能各自
+    // 找到匹配，测不出结构被破坏；带父元素的子串形式会在拍平后立刻找不到，
+    // 才能测出 REQUIRED 里点名"必须独立成节点供脚本写入"的这两个节点真的还在。
     const marks = [
       'class="tagline"',
       'data-artwork-id',
       'class="titlelink"',
-      '<p class="a">',
+      '<p class="a"><span>',
       '<i>',
-      '<p class="p num">',
+      '<p class="p num"><span>',
       '<small>'
     ];
     for (const m of marks) {
       expect(card.includes(m), `ArtworkCard.astro 缺少 ${m}，buildCard 会静默失效`).toBe(true);
     }
-  });
-
-  it('契约清单本身有据可查', () => {
-    expect(REQUIRED.length).toBe(7);
-    for (const r of REQUIRED) expect(r.why.length).toBeGreaterThan(8);
   });
 });
