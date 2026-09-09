@@ -227,15 +227,21 @@ const COUNTRIES = countryCount();
       <SectionHead title="Artists to follow" />
       <!-- 同样是 data-artwork-id + .pbox 的约定，画布由下面 Curator's picks 那次
            文档级 paintGrid() 一起画出来。
-           卡片指向艺术家主页而不是那件作品——这一栏推的是人，不是画。 -->
+           卡片指向艺术家主页而不是那件作品——这一栏推的是人，不是画。
+           .pbox 用 data-fill 而不是 data-pad：与 ArtworkCard 的 .wall 同一种定尺法，
+           画布填满卡片宽度，高度按长宽比换算，不再走 displaySize 的真实相对缩放
+           （原来 152px 的固定框配小尺寸原作，画布实测只有 52×86px，几乎看不见）。
+           画作标题直接标在图片下方作图说，避免这张画被当成艺术家本人的头像；
+           艺术家名的字号盖过图说，因为这是艺术家卡片，人才是主体。 -->
       <div class="artists">
         {featuredArtists.map((item) => (
           <a class="artist" href={`/artist/${artistById(item.artistId)!.slug}/`}>
-            <span class="pbox" data-pad="18">
+            <span class="pbox" data-fill>
               <canvas data-artwork-id={item.id} style={`background:${placeholderColor(item)}`}></canvas>
             </span>
+            <span class="cap"><em>{item.title}</em>, {item.year}</span>
             <b>{item.artistName}</b>
-            <em>{item.country} &middot; {item.style}</em>
+            <em class="loc">{item.country} &middot; {item.style}</em>
           </a>
         ))}
       </div>
@@ -448,31 +454,43 @@ const COUNTRIES = countryCount();
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 26px;
+    /* 画布现在按各自作品的长宽比换算高度（见下方 .pbox 注释），四张卡片的
+       画布高度互不相同；不设 start 的话网格默认拉伸每张卡片去填满整行里
+       最高的那一张，矮画作的卡片下方会空出一截。 */
+    align-items: start;
   }
   .artist {
     display: block;
     text-align: left;
   }
+  /* 与 ArtworkCard 的 .wall 同一种定尺法（data-fill）：画布填满卡片宽度，
+     不再是配 var(--wall) 背景色、居中摆放小画的固定 152px 展示框。 */
   .artist .pbox {
-    height: 152px;
-    background: var(--wall);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
+    position: relative;
+    display: block;
+    margin-bottom: 10px;
   }
   .artist .pbox canvas {
+    display: block;
     box-shadow:
       0 1px 0 color-mix(in srgb, var(--ink) 24%, transparent),
       4px 6px 14px color-mix(in srgb, var(--ink) 18%, transparent);
   }
+  /* 图说：标出画布里是哪件作品、哪一年，让它读成"配了图说的作品"而不是
+     一张没有说明的头像。 */
+  .artist .cap {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
   .artist b {
     display: block;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 600;
     margin-bottom: 2px;
   }
-  .artist em {
+  .artist em.loc {
     font-style: normal;
     font-size: 12px;
     color: var(--ink-2);
