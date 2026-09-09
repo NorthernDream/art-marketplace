@@ -357,7 +357,7 @@ export function initCatalogPage(items: CatalogItem[]): void {
       const [heading, hint] = state.query
         ? [`No works match &ldquo;${escapeText(state.query)}&rdquo;`, 'Try a different word, or clear the search.']
         : ['No works match those filters', 'Try removing a filter, or widening your selection.'];
-      moreHost!.innerHTML = `<div class="empty"><h3>${heading}</h3><p>${hint}</p></div>`;
+      moreHost!.innerHTML = `<div class="empty"><h2>${heading}</h2><p>${hint}</p></div>`;
       return;
     }
 
