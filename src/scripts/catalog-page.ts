@@ -529,6 +529,9 @@ export function initCatalogPage(items: CatalogItem[]): void {
   });
 
   filterToggle?.addEventListener('click', () => {
-    facetsHost.classList.toggle('open');
+    const open = facetsHost.classList.toggle('open');
+    // 同组件的 #sortTrigger 一直有 aria-expanded，Filters 漏了：
+    // 展开状态不对辅助技术暴露，屏幕阅读器读不出面板是开是关。
+    filterToggle.setAttribute('aria-expanded', String(open));
   });
 }

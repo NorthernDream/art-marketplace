@@ -8,7 +8,7 @@ interface Props {
 const { count } = Astro.props;
 ---
 <div class="rbar">
-  <button type="button" id="filterToggle">Filters</button>
+  <button type="button" id="filterToggle" aria-expanded="false" aria-controls="facets">Filters</button>
   <span class="rcount"><b class="num" id="result-count">{count}</b> works</span>
   <div class="sp"></div>
   {/*
@@ -98,7 +98,7 @@ const { count } = Astro.props;
     display: flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-strong);
     background: var(--surface);
     height: 34px;
     padding: 0 10px 0 12px;
@@ -167,6 +167,23 @@ const { count } = Astro.props;
     padding: 0 14px;
     font-size: 12.5px;
     font-weight: 600;
+  }
+
+  /* 透明热区：视觉高度仍是 34px，可点区域补到 44px。
+     ::after 不参与布局，结果栏的排版一点不动。 */
+  .sorttrigger,
+  #filterToggle {
+    position: relative;
+  }
+  .sorttrigger::after,
+  #filterToggle::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
   }
 
   @media (max-width: 900px) {
