@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { PRIMARY_NAV, FOOTER_COLUMNS } from './nav';
-import { readdirSync, existsSync } from 'node:fs';
+import { PRIMARY_NAV, FOOTER_COLUMNS, DECORATIVE_LINKS } from './nav';
+import { readdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 
 // 项目是 ESM，没有 __dirname，用 import.meta.url 定位
 const PAGES_DIR = fileURLToPath(new URL('../pages/', import.meta.url));
@@ -63,5 +63,53 @@ describe('导航', () => {
 
   it('pages 目录下确实存在 astro 页面', () => {
     expect(readdirSync(PAGES_DIR).some(f => f.endsWith('.astro'))).toBe(true);
+  });
+});
+
+const SRC = fileURLToPath(new URL('../', import.meta.url));
+
+function sourceFiles(dir: string): string[] {
+  const out: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) out.push(...sourceFiles(path));
+    else if (/\.astro$/.test(name)) out.push(path);
+  }
+  return out;
+}
+
+describe('装饰性链接', () => {
+  /**
+   * spec §12 的验收标准：导航与页脚无死链，装饰性链接除外且必须在功能清单中列明。
+   * href="#" 是「看起来能点、点了什么都不发生」，它既不是真链接也没在任何地方
+   * 交代过。本轮把这类元素一律改成非链接，并在 DECORATIVE_LINKS 里记账。
+   */
+  it('组件与页面里不存在 href="#" 死链', () => {
+    const offenders: string[] = [];
+    for (const dir of ['components', 'pages', 'layouts']) {
+      for (const file of sourceFiles(join(SRC, dir))) {
+        const body = readFileSync(file, 'utf8');
+        if (body.includes('href="#"')) offenders.push(file.slice(SRC.length));
+      }
+    }
+    expect(offenders, `以下文件仍有 href="#"：${offenders.join(', ')}`).toEqual([]);
+  });
+
+  it('清单非空，且每条都写明了出处、标签与归属阶段', () => {
+    expect(DECORATIVE_LINKS.length).toBeGreaterThan(0);
+    for (const d of DECORATIVE_LINKS) {
+      expect(d.where.length, '缺少出处').toBeGreaterThan(0);
+      expect(d.label.length, '缺少标签').toBeGreaterThan(0);
+      expect([3, 4], `${d.label} 的归属阶段不合法`).toContain(d.plannedPhase);
+    }
+  });
+
+  it('清单里的每条都能在它声明的组件里找到', () => {
+    for (const d of DECORATIVE_LINKS) {
+      const file = join(SRC, 'components', `${d.where}.astro`);
+      expect(existsSync(file), `${d.where}.astro 不存在`).toBe(true);
+      const body = readFileSync(file, 'utf8');
+      expect(body.includes(d.label), `${d.where}.astro 里找不到 ${d.label}`).toBe(true);
+    }
   });
 });

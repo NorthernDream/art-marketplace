@@ -2,7 +2,14 @@
 // 页脚四栏。尚未建立的目标页（live: false）不渲染成链接，而是像主导航里的
 // Photography / Sculpture 一样标一枚 Coming soon——把访客送到一个 404 上，
 // 比老实承认这页还没做要难看得多。
-import { FOOTER_COLUMNS } from '../lib/nav';
+import { FOOTER_COLUMNS, DECORATIVE_LINKS } from '../lib/nav';
+
+// 法务页（Terms / Privacy / Cookies）在 Phase 4 才建。与页脚其他未建页面
+// 同等对待：不渲染成链接，标 Coming soon。不因为是法务页就特殊处理。
+// 清单见 lib/nav.ts 的 DECORATIVE_LINKS。
+const LEGAL_LINKS = DECORATIVE_LINKS
+  .filter((d) => d.where === 'SiteFooter')
+  .map((d) => d.label);
 ---
 <footer class="site">
   <div class="wrap">
@@ -26,7 +33,9 @@ import { FOOTER_COLUMNS } from '../lib/nav';
     </div>
     <div class="fbot">
       <span>&copy; 2026 VELIN Art</span>
-      <a href="#">Terms</a><a href="#">Privacy</a><a href="#">Cookies</a>
+      {LEGAL_LINKS.map((label) => (
+        <span class="soon">{label} <span class="tag">Coming soon</span></span>
+      ))}
       <span class="note">Prototype. Artworks, artists and prices shown are fictional samples.</span>
     </div>
   </div>
@@ -57,10 +66,20 @@ import { FOOTER_COLUMNS } from '../lib/nav';
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 9px;
+    gap: 0;
+  }
+  /* 触控目标：13px/20px 行高的链接原来只有 17px 高，加 12px 上下内边距到 44px。
+     行距从 ul 的 gap 移进 padding，视觉节奏基本不变，代价是每栏高约 60px。
+     这一处不能用透明热区：链接密排，44px 的热区会互相重叠，点谁都不确定。 */
+  .fcols a,
+  .fcols .soon {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 13px;
+    line-height: 20px;
   }
   .fcols a {
-    font-size: 13px;
     color: var(--ink-2);
   }
   .fcols a:hover {
@@ -68,10 +87,7 @@ import { FOOTER_COLUMNS } from '../lib/nav';
     text-decoration: underline;
   }
   .fcols .soon {
-    display: inline-flex;
-    align-items: center;
     gap: 7px;
-    font-size: 13px;
     color: var(--ink-3);
   }
   .fcols .tag {
@@ -99,6 +115,22 @@ import { FOOTER_COLUMNS } from '../lib/nav';
   .fbot .note {
     margin-left: auto;
     text-align: right;
+  }
+  .fbot .soon {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .fbot .tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 1px 5px;
+    white-space: nowrap;
   }
 
   @media (max-width: 1080px) {
