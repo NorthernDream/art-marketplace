@@ -95,6 +95,15 @@ export function searchFromState(selection: Selection, sort: SortKey, query = '')
 
 /** 渲染八组分面（含互斥自身维度的计数），供首屏与每次交互复用 */
 export function renderFacetsMarkup(items: CatalogItem[], sel: Selection): string {
+  // 关键词搜不到东西时 items 为空：六个从 items 推取值的分面会退化成只剩标题，
+  // size/price 走固定顺序则渲染出一长串全零禁用项，页面上是一列空标题，像坏了。
+  // 注意判据是 items 为空，不是结果数为 0——按分面筛到 0 件时 items 仍非空，
+  // 那时分面必须照常渲染，否则用户没法取消自己刚加的筛选。
+  if (!items.length) {
+    return `<div class="fgroup fempty"><span class="eyebrow">Filters</span>` +
+      `<p>Nothing matches this search, so there is nothing left to narrow.</p></div>`;
+  }
+
   return FACETS.map((f) => {
     const counts = facetCounts(items, sel, f.key);
     const values = valuesForFacet(f.key, items);
@@ -115,6 +124,8 @@ export function renderFacetsMarkup(items: CatalogItem[], sel: Selection): string
       </label>`;
       })
       .join('');
+    // 某组一个可选值都没有时整组不渲染，别留一个光秃秃的标题
+    if (!rows) return '';
     return `<div class="fgroup"><span class="eyebrow">${escapeText(f.label)}</span>${rows}</div>`;
   }).join('');
 }
