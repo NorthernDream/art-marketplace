@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { ARTISTS } from './data/artists';
 import { ARTWORKS } from './data/artworks';
+import { stripComments } from './test-helpers';
 
 // 项目是 ESM，没有 __dirname，用 import.meta.url 定位
 const SRC = fileURLToPath(new URL('../', import.meta.url));
@@ -18,23 +19,6 @@ const EM_DASH_ENTITY = /&mdash;|&#8212;|&#x2014;/i;
 
 function hasEmDash(line: string): boolean {
   return line.includes(EM_DASH) || EM_DASH_ENTITY.test(line);
-}
-
-/**
- * 站点文案不使用 em dash：改用逗号、句号、冒号或括号。
- * 中文代码注释不是 UI 文案，扫描前先把注释剥掉。
- *
- * 行注释只剥「整行都是注释」的那种（行首可有空白），不剥行尾注释。
- * 理由是失败方向：宽松的 `[^:]//` 写法会把「同一行里 // 之后的所有内容」吃掉，
- * 一旦某行既有 `//` 又有真正的违规文案，违规就被静默吞掉，那是 false PASS。
- * 只剥整行注释最坏的结果是把行尾注释里的内容也算进来，那是 false FAIL，
- * 会吵，但不会漏。守卫宁可吵也不能漏。
- */
-function stripComments(source: string): string {
-  return source
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/^[ \t]*\/\/[^\n]*$/gm, '');
 }
 
 function sourceFiles(dir: string): string[] {

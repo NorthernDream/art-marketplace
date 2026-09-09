@@ -52,7 +52,10 @@ describe('艺术家事实（从作品算出，不新增数据）', () => {
 
 describe('国家数', () => {
   it('countryCount 等于数据里不重复的国家数', () => {
-    expect(countryCount()).toBe(new Set(ARTISTS.map((a) => a.country)).size);
+    // 钉住事实值，而不是把实现里的公式在测试里再算一遍：
+    // 后者只要两边一起错就照样绿。首页那句文案是一个事实主张，
+    // 数据集增删国家时这条测试应该红，好让人重新确认那个数字。
+    expect(countryCount()).toBe(35);
   });
 
   /**

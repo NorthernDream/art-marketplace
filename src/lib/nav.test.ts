@@ -3,6 +3,7 @@ import { PRIMARY_NAV, FOOTER_COLUMNS, DECORATIVE_LINKS } from './nav';
 import { readdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, join } from 'node:path';
+import { stripComments } from './test-helpers';
 
 // 项目是 ESM，没有 __dirname，用 import.meta.url 定位
 const PAGES_DIR = fileURLToPath(new URL('../pages/', import.meta.url));
@@ -76,19 +77,6 @@ function sourceFiles(dir: string): string[] {
     else if (/\.astro$/.test(name)) out.push(path);
   }
   return out;
-}
-
-/**
- * 注释不算数：扫描前先剥掉。
- * 否则一条解释「原来它们是 href="#" 的死链」的注释会被当成死链本身，
- * 而修法就变成把注释改写得不像话去迁就扫描器，本末倒置。
- * .astro 里三种注释都要剥：HTML 注释、块注释、行注释（URL 里的 // 前有冒号，不剥）。
- */
-function stripComments(source: string): string {
-  return source
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|[^:])\/\/[^\n]*/g, '$1');
 }
 
 describe('装饰性链接', () => {
