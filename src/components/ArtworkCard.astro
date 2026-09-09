@@ -56,6 +56,12 @@ const detailHref = `/artwork/${item.slug}`;
   .card {
     position: relative;
     display: grid;
+    /* 必须显式声明列，且用 minmax(0, 1fr)：只写 grid-template-rows 时隐式列按
+       auto 定尺、向 max-content 靠，会被 .inroom 之类的内容撑过卡片自身的宽度。
+       实测 390px 下卡片本身 163px，而隐式列被撑到 300px，paintGrid 于是往
+       163px 的格子里画了 300px 的画布，整页横向滚动 114px。
+       minmax(0, 1fr) 允许列收缩到内容宽度以下，这是网格项溢出的标准解法。 */
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
     text-align: left;
     width: 100%;
