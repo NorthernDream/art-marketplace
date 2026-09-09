@@ -268,6 +268,9 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
     }
     .mark {
       font-size: 21px;
+      /* 不设的话会继承 body 的无单位 line-height:1.5，单行的 wordmark
+         用不上这行高，却在这个头部已是最大固定元素的视口里白吃 7px。 */
+      line-height: 1.15;
     }
     .mark span {
       display: none;
