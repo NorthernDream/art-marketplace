@@ -100,7 +100,7 @@ const yearRange =
   let timer: number | undefined;
   btn?.addEventListener('click', () => {
     if (!toast) return;
-    toast.textContent = 'Following — you’ll hear when new work is listed';
+    toast.textContent = 'Following is not live in this prototype yet';
     toast.classList.add('on');
     window.clearTimeout(timer);
     timer = window.setTimeout(() => toast.classList.remove('on'), 2400);

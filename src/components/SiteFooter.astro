@@ -36,7 +36,9 @@ const LEGAL_LINKS = DECORATIVE_LINKS
       {LEGAL_LINKS.map((label) => (
         <span class="soon">{label} <span class="tag">Coming soon</span></span>
       ))}
-      <span class="note">Prototype. Artworks, artists and prices shown are fictional samples.</span>
+      {/* 原文只覆盖 artworks / artists / prices，不覆盖促销码、运费、退货与
+          真伪证书这些政策主张，而页面上到处都是。范围扩到「样例」二字管得住的地方。 */}
+      <span class="note">Prototype. Artworks, artists, prices, offers and policies shown are fictional samples.</span>
     </div>
   </div>
 </footer>
