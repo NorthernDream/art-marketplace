@@ -43,7 +43,7 @@ const catalog = buildCatalog(ARTWORKS, ARTISTS);
 const self = catalog.find((item) => item.id === artwork.id)!;
 const related = relatedWorks(catalog, self, 4);
 ---
-<Base title={`${artwork.title} — VELIN`} description={artwork.statement}>
+<Base title={`${artwork.title}: VELIN`} description={artwork.statement}>
   <div class="wrap detail" data-artwork-page>
     <p class="crumbs">
       <a href="/">Home</a> / <a href={category.href}>{category.label}</a> / {artwork.title}
@@ -113,7 +113,7 @@ const related = relatedWorks(catalog, self, 4);
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>
-            <span>14-day returns &mdash; refund if it isn&rsquo;t right on the wall</span>
+            <span>14-day returns: refund if it isn&rsquo;t right on the wall</span>
           </li>
         </ul>
       </div>
