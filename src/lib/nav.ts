@@ -63,8 +63,9 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
  *
  * spec §12 的验收标准是「导航与页脚无死链(装饰性链接除外,并在功能清单中列明)」,
  * 这份清单就是那个功能清单。这些元素一律不渲染成 <a href="#">:头部的三个图标
- * 改成非链接的 <span> 并 aria-hidden(横向空间放不下可见标签),页脚的三条法务
- * 链接改成非链接加 Coming soon 标记(与页脚其他未建页面同等对待)。
+ * 改成非链接的 <span>,装饰性的 <svg> 与可见文字各自 aria-hidden,另配一份
+ * .sr-only 状态文本(如 "Sign In, coming soon"),让读屏用户拿到与视觉一致的
+ * 信息;页脚三条法务链接改成非链接加可见的 Coming soon 标记。
  *
  * 对应阶段一旦建起页面,就从这份清单里删掉、改回真链接。
  */
