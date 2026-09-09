@@ -44,9 +44,14 @@ const { categories } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 5px;
-    padding: 20px 18px 20px 0;
+    /* 左右对称，让文字离开分隔线。首格例外：它要和上方的小节标题对齐在同一条
+       版心线上，多出 18px 会显得是排版失误。 */
+    padding: 20px 18px;
     border-bottom: 1px solid var(--line);
     border-right: 1px solid var(--line-2);
+  }
+  .catrow > :first-child {
+    padding-left: 0;
   }
   .catrow > :last-child {
     border-right: 0;
@@ -74,6 +79,12 @@ const { categories } = Astro.props;
     }
     .catrow > :nth-child(2n) {
       border-right: 0;
+    }
+    /* 两列布局下每行的领头格都要贴齐左侧版心线，不只是整个网格的第一个格：
+       :first-child 只覆盖第一行第一格，第二行开头（第三格）仍会带着 18px
+       的左内距，读起来和第一行不对齐。 */
+    .catrow > :nth-child(2n+1) {
+      padding-left: 0;
     }
   }
 </style>
