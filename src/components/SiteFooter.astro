@@ -16,7 +16,7 @@ const LEGAL_LINKS = DECORATIVE_LINKS
     <div class="fcols">
       {FOOTER_COLUMNS.map((col) => (
         <div>
-          <h4>{col.title}</h4>
+          <h2>{col.title}</h2>
           <ul>
             {col.links.map((link) => (
               <li>
@@ -55,7 +55,7 @@ const LEGAL_LINKS = DECORATIVE_LINKS
     grid-template-columns: repeat(4, 1fr);
     gap: 40px;
   }
-  .fcols h4 {
+  .fcols h2 {
     font-size: 10.5px;
     font-weight: 600;
     letter-spacing: 0.14em;

@@ -93,11 +93,18 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
     height: 64px;
   }
   .mark {
+    position: relative;
     font-family: var(--f-display);
     font-size: 25px;
     letter-spacing: 0.22em;
     padding-right: 4px;
     white-space: nowrap;
+  }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，所以头部高度预算与页面排版都不受影响。 */
+  .mark::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px;
   }
   .mark span {
     display: block;
@@ -108,6 +115,7 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
     margin-top: -4px;
   }
   .search {
+    position: relative;
     flex: 1;
     display: flex;
     align-items: center;
@@ -118,6 +126,13 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
     height: 36px;
     background: var(--paper);
     max-width: 420px;
+  }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，所以头部高度预算与页面排版都不受影响。
+     必须 pointer-events: none，否则会盖在 input 上面把光标挡掉。 */
+  .search::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px; pointer-events: none;
   }
   .search input {
     border: 0;

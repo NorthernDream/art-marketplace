@@ -350,6 +350,17 @@ const COUNTRIES = countryCount();
   .sec {
     padding: 54px 0 0;
   }
+  /* "See all" 的 .link 在 SectionHead.astro 里渲染，Astro 的作用域样式不会
+     跨组件生效，所以要用 :global() 越过作用域，用 .sec 限定只影响这个宿主。
+     透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，不影响 .sechead 的排版。 */
+  .sec :global(.link) {
+    position: relative;
+  }
+  .sec :global(.link)::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px;
+  }
 
   .roomband {
     display: grid;
@@ -414,10 +425,17 @@ const COUNTRIES = countryCount();
     margin-top: 20px;
   }
   .pricerow a {
+    position: relative;
     border: 1px solid var(--line);
     background: var(--surface);
     padding: 9px 16px;
     font-size: 12.5px;
+  }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，不影响 .pricerow 的排版。 */
+  .pricerow a::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px;
   }
   .pricerow a:hover {
     border-color: var(--ink);
