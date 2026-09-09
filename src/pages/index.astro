@@ -12,6 +12,7 @@ import type { CatalogItem, Selection } from '../lib/catalog';
 import { PRIMARY_NAV } from '../lib/nav';
 import { dimensions } from '../lib/format';
 import { placeholderColor } from '../lib/art/render';
+import { countryCount } from '../lib/artist';
 
 const CATALOG: CatalogItem[] = buildCatalog(ARTWORKS, ARTISTS);
 const PAINTINGS: CatalogItem[] = CATALOG.filter((item) => item.category === 'painting');
@@ -118,17 +119,23 @@ const priceBands = PRICE_ORDER.map((band) => ({
 // 它的艺术家（a16）也不在精选那四件里。----------
 const FEATURED_ARTIST_WORK_IDS = ['w022', 'w017', 'w025', 'w032'];
 const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
+
+// 全站其他数字都从目录现算，这一处原来写死成 84，而数据里只有 35。
+const COUNTRIES = countryCount();
 ---
-<Base title="VELIN — Original Art, Direct From the Studio" description="Paintings by independent artists in 84 countries — each one an original, priced by the artist who made it.">
+<Base
+  title="VELIN: Original Art, Direct From the Studio"
+  description={`Paintings by independent artists in ${COUNTRIES} countries. Each one an original, priced by the artist who made it.`}
+>
   <div class="wrap">
     <section class="hero">
       <div>
         <span class="eyebrow">Original art, direct from the studio</span>
         <h1>Every wall deserves something <em>no one else has.</em></h1>
         <p>
-          Paintings by independent artists in 84 countries — each one an original, priced by the
-          artist who made it, shipped with a certificate of authenticity and 14 days to change
-          your mind.
+          Paintings by independent artists in {COUNTRIES} countries. Each one an original,
+          priced by the artist who made it, shipped with a certificate of authenticity
+          and 14 days to change your mind.
         </p>
         <div class="cta">
           <a class="btn solid" href="/paintings">Browse Paintings</a>

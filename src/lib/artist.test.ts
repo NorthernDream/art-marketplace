@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { artistFacts } from './artist';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { artistFacts, countryCount } from './artist';
 import { ARTISTS } from './data/artists';
 
 describe('艺术家事实（从作品算出，不新增数据）', () => {
@@ -45,5 +47,25 @@ describe('艺术家事实（从作品算出，不新增数据）', () => {
 
   it('未知 id 返回 undefined，而不是抛错或空壳', () => {
     expect(artistFacts('no-such-artist')).toBeUndefined();
+  });
+});
+
+describe('国家数', () => {
+  it('countryCount 等于数据里不重复的国家数', () => {
+    expect(countryCount()).toBe(new Set(ARTISTS.map((a) => a.country)).size);
+  });
+
+  /**
+   * 首页 hero 原文写着 "in 84 countries"，而数据里只有 35 个。
+   * 全站其他数字都从目录现算，唯独这一处写死且写错。
+   * 这条守卫盯着它不再退回写死的字面量。
+   */
+  it('首页不出现写死的「数字 + countries」', () => {
+    const index = readFileSync(
+      fileURLToPath(new URL('../pages/index.astro', import.meta.url)),
+      'utf8'
+    );
+    const hardcoded = index.match(/\d+\s*countries/gi) ?? [];
+    expect(hardcoded, `首页写死了国家数：${hardcoded.join(', ')}`).toEqual([]);
   });
 });
