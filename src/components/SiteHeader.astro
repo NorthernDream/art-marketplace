@@ -127,13 +127,6 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
     background: var(--paper);
     max-width: 420px;
   }
-  /* 透明热区：视觉尺寸不变，可点区域补到 44px。
-     ::after 绝对定位、不参与布局，所以头部高度预算与页面排版都不受影响。
-     必须 pointer-events: none，否则会盖在 input 上面把光标挡掉。 */
-  .search::after {
-    content: ''; position: absolute; left: 0; right: 0;
-    top: 50%; transform: translateY(-50%); height: 44px; pointer-events: none;
-  }
   .search input {
     border: 0;
     background: none;
@@ -143,6 +136,13 @@ const currentPath = rawPath !== '/' && rawPath.endsWith('/') ? rawPath.slice(0, 
     font-size: 16px;
     width: 100%;
     color: var(--ink);
+    /* 真正把可点高度做到 44px。外框 .search 仍是 36px（边框画在它身上），
+       负的 margin-block 把多出来的 8px 吃回去，视觉尺寸一点不变。
+       原来这里用 ::after 铺一条 44px 的伪元素，但它必须带 pointer-events: none
+       才不会盖住输入框吃掉光标，于是它接收不到任何点击 —— 量出来是 44px，
+       点起来还是 36px，反而骗过了测量脚本。 */
+    height: 44px;
+    margin-block: -4px;
   }
   .search input::placeholder {
     color: var(--ink-3);
