@@ -12,7 +12,7 @@ export const ARTISTS: Artist[] = [
     bio: 'Ilse Marchetti paints from studies made along the Adriatic coast, then reworks each canvas in the studio over several months until the light settles.',
     statement: 'I never finish anything on the coast. The studies come back wet and wrong, and I spend the winter arguing with them. A painting is done when it stops reminding me of the afternoon it came from.',
     exhibitions: [
-      'Galleria San Petronio, Bologna — solo, 2018',
+      'Galleria San Petronio, Bologna, solo, 2018',
       'Adriatic Light, group show, Rimini, 2021',
       'Premio Emilia, shortlist, 2023',
     ]
@@ -31,10 +31,10 @@ export const ARTISTS: Artist[] = [
   {
     id: 'a03', slug: 'nadia-belhaj', name: 'Nadia Belhaj',
     country: 'Morocco', city: 'Casablanca', joinedYear: 2019, followers: 1560,
-    bio: 'Nadia Belhaj makes interiors emptied of people — doorways, corners, unlit rooms — using flat acrylic and a palette drawn from unpainted plaster.',
+    bio: 'Nadia Belhaj makes interiors emptied of people (doorways, corners, unlit rooms) using flat acrylic and a palette drawn from unpainted plaster.',
     statement: 'People keep asking where everyone went. Nobody left. I paint the ten minutes before a room is used, when the furniture is still holding the shape of the last person in it.',
     exhibitions: [
-      'Villa des Arts, Casablanca — solo, 2020',
+      'Villa des Arts, Casablanca, solo, 2020',
       'Interior Distance, Rabat, 2022',
       'Maghreb Contemporary, Tangier, 2024',
     ]
@@ -47,7 +47,7 @@ export const ARTISTS: Artist[] = [
     exhibitions: [
       'Kunsthal Rotterdam, group show, 2012',
       'Weather Studies, Amsterdam, 2016',
-      'Twenty Panels, Utrecht — solo, 2021',
+      'Twenty Panels, Utrecht, solo, 2021',
     ]
   },
   {
@@ -57,7 +57,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Gold leaf taught me patience and ink taught me to spend it in one movement. The two disciplines disagree with each other on every canvas I make, and I have stopped trying to reconcile them.',
     exhibitions: [
       'Kanazawa 21st Century Museum, group show, 2016',
-      'Leaf and Line, Tokyo — solo, 2019',
+      'Leaf and Line, Tokyo, solo, 2019',
       'Ishikawa Prize, winner, 2022',
       'Contemporary Ink, Osaka, 2025',
     ]
@@ -69,7 +69,7 @@ export const ARTISTS: Artist[] = [
     statement: 'My grandfather could tell which riverbank a clay came from by tasting it. I cannot do that. What I inherited was the habit of grinding my own colour, and the belief that it matters where it came from.',
     exhibitions: [
       'Kumasi Cultural Centre, 2018',
-      'Earth and Ash, Accra — solo, 2021',
+      'Earth and Ash, Accra, solo, 2021',
       'West African Contemporary, Lagos, 2024',
     ]
   },
@@ -77,10 +77,10 @@ export const ARTISTS: Artist[] = [
     id: 'a07', slug: 'elif-demirtas', name: 'Elif Demirtaş',
     country: 'Turkey', city: 'Izmir', joinedYear: 2020, followers: 1140,
     bio: 'Elif Demirtaş draws the Aegean coastline from memory rather than observation, producing loose, almost cartographic studies of harbours and cliffs.',
-    statement: 'I stopped bringing paper to the coast. Memory edits better than I do — it throws away the parked cars and keeps the shape of the bay, which is the only part I wanted.',
+    statement: 'I stopped bringing paper to the coast. Memory edits better than I do. It throws away the parked cars and keeps the shape of the bay, which is the only part I wanted.',
     exhibitions: [
       'Izmir Art Centre, 2021',
-      'Coastlines, Istanbul — solo, 2023',
+      'Coastlines, Istanbul, solo, 2023',
       'Aegean Drawing, Bodrum, 2025',
     ]
   },
@@ -91,7 +91,7 @@ export const ARTISTS: Artist[] = [
     statement: 'A miniature asks you to lean in. A mural asks you to step back. I want a painting that does both, so I paint at arm\'s length and hope the detail survives the enlargement.',
     exhibitions: [
       'Lalit Kala Akademi, Chennai, 2013',
-      'Scale and Detail, Delhi — solo, 2017',
+      'Scale and Detail, Delhi, solo, 2017',
       'Kochi Biennale, collateral, 2020',
       'South Asian Painting Now, Mumbai, 2024',
     ]
@@ -104,7 +104,7 @@ export const ARTISTS: Artist[] = [
     exhibitions: [
       'Darat al Funun, Amman, 2015',
       'Stone and Block, Beirut, 2019',
-      'Printmaking Now, Cairo — solo, 2023',
+      'Printmaking Now, Cairo, solo, 2023',
     ]
   },
   {
@@ -114,7 +114,7 @@ export const ARTISTS: Artist[] = [
     statement: 'The same shoreline, the same month, eleven years running. People assume it is a discipline. It is closer to an inability to leave a thing alone once I have started counting.',
     exhibitions: [
       'Malmö Konsthall, group show, 2019',
-      'Öresund, January, Copenhagen — solo, 2022',
+      'Öresund, January, Copenhagen, solo, 2022',
       'Nordic Light, Gothenburg, 2025',
     ]
   },
@@ -122,10 +122,10 @@ export const ARTISTS: Artist[] = [
     id: 'a11', slug: 'ana-paula-ferreira', name: 'Ana Paula Ferreira',
     country: 'Brazil', city: 'Salvador', joinedYear: 2010, followers: 9020,
     bio: 'Ana Paula Ferreira layers acrylic and collage to build dense, tropical compositions; she has shown steadily in Salvador and São Paulo since her first solo show in 2009.',
-    statement: 'Everything goes in — bus tickets, wrapping paper, the printed side of a cement bag. Salvador is not a quiet place and I have never understood why a painting of it should be.',
+    statement: 'Everything goes in: bus tickets, wrapping paper, the printed side of a cement bag. Salvador is not a quiet place and I have never understood why a painting of it should be.',
     exhibitions: [
       'Museu de Arte Moderna da Bahia, 2009',
-      'Camadas, São Paulo — solo, 2015',
+      'Camadas, São Paulo, solo, 2015',
       'Tropical Density, Rio de Janeiro, 2021',
       'Bienal de Salvador, 2024',
     ]
@@ -137,7 +137,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Twenty minutes, then I stop whether it is finished or not. The constraint is not artistic discipline; it is that the light on the container cranes moves and I refuse to invent it.',
     exhibitions: [
       'Haifa Museum of Art, group show, 2017',
-      'Twenty Minutes, Tel Aviv — solo, 2020',
+      'Twenty Minutes, Tel Aviv, solo, 2020',
       'Port Studies, Jaffa, 2023',
     ]
   },
@@ -148,7 +148,7 @@ export const ARTISTS: Artist[] = [
     statement: 'No two prints in an edition are the same and I have stopped apologising for it. The variation is where the hand is. A perfectly uniform run would mean a machine had done the interesting part.',
     exhibitions: [
       'Lagos Print Fair, 2022',
-      'Market Days, Abuja — solo, 2024',
+      'Market Days, Abuja, solo, 2024',
       'Nigerian Printmakers, Lagos, 2026',
     ]
   },
@@ -159,7 +159,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Taking the colour out was not a purification. It was closer to turning down a radio I had stopped listening to. Once the grey was all that was left, I could finally hear the shape of the water.',
     exhibitions: [
       'Bergen Kunsthall, 2014',
-      'Grey Water, Oslo — solo, 2018',
+      'Grey Water, Oslo, solo, 2018',
       'Nordic Landscape, Stockholm, 2022',
     ]
   },
@@ -170,7 +170,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Reduction printing destroys the block as it goes, so the edition size is decided before the first cut and cannot be revisited. Twelve is what I can carve before my attention leaves.',
     exhibitions: [
       'Kyoto Print Studio, group show, 2023',
-      'Twelve, Kyoto — solo, 2025',
+      'Twelve, Kyoto, solo, 2025',
     ]
   },
   {
@@ -180,7 +180,7 @@ export const ARTISTS: Artist[] = [
     statement: 'I grew up under paintings the size of walls and I make things you could carry home under one arm. The crowd is still there. I have simply stopped asking a building to hold it.',
     exhibitions: [
       'Museo de Arte Contemporáneo de Oaxaca, 2012',
-      'Pequeño Mural, Mexico City — solo, 2016',
+      'Pequeño Mural, Mexico City, solo, 2016',
       'Figuras, Guadalajara, 2020',
       'Oaxaca Now, 2025',
     ]
@@ -189,10 +189,10 @@ export const ARTISTS: Artist[] = [
     id: 'a17', slug: 'amara-diallo', name: 'Amara Diallo',
     country: 'Senegal', city: 'Dakar', joinedYear: 2019, followers: 1420,
     bio: 'Amara Diallo works in reverse-glass painting, a technique she picked up from sign painters in Dakar, using it to render portraits of market vendors.',
-    statement: 'Painting on glass means working backwards — the highlight goes down first, the background last. You commit to the face before you know what will sit behind it. I find that honest.',
+    statement: 'Painting on glass means working backwards: the highlight goes down first, the background last. You commit to the face before you know what will sit behind it. I find that honest.',
     exhibitions: [
       'Galerie Le Manège, Dakar, 2020',
-      'Sous Verre, Saint-Louis — solo, 2023',
+      'Sous Verre, Saint-Louis, solo, 2023',
       'Dak\'Art, off programme, 2024',
     ]
   },
@@ -200,10 +200,10 @@ export const ARTISTS: Artist[] = [
     id: 'a18', slug: 'ferenc-nagy', name: 'Ferenc Nagy',
     country: 'Hungary', city: 'Pécs', joinedYear: 2015, followers: 2050,
     bio: 'Ferenc Nagy makes charcoal drawings of abandoned factory interiors around Pécs, working on site with paper pinned directly to the wall.',
-    statement: 'The paper picks up the wall. Grit, damp, whatever is flaking off that year — it all ends up in the drawing whether I want it or not, and by now I want it.',
+    statement: 'The paper picks up the wall. Grit, damp, whatever is flaking off that year: it all ends up in the drawing whether I want it or not, and by now I want it.',
     exhibitions: [
       'Zsolnay Quarter, Pécs, 2016',
-      'Empty Halls, Budapest — solo, 2019',
+      'Empty Halls, Budapest, solo, 2019',
       'Central European Drawing, Vienna, 2023',
     ]
   },
@@ -214,7 +214,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Tile work gives you a rule and asks you to find freedom inside it. I kept the rule. The canvases are large now because I wanted to see what happens when the pattern runs out of wall.',
     exhibitions: [
       'Isfahan Museum of Contemporary Art, 2018',
-      'Geometry Without Tile, Tehran — solo, 2021',
+      'Geometry Without Tile, Tehran, solo, 2021',
       'Persian Abstraction, Dubai, 2024',
     ]
   },
@@ -225,20 +225,20 @@ export const ARTISTS: Artist[] = [
     statement: 'From up there the roofs read as one surface, all those separate households flattened into a single sheet of colour. That compression is the whole subject. I have never needed another.',
     exhibitions: [
       'Johannesburg Art Gallery, group show, 2021',
-      'Rooftops, Cape Town — solo, 2023',
+      'Rooftops, Cape Town, solo, 2023',
       'South African Painting, Durban, 2025',
     ]
   },
   {
     id: 'a21', slug: 'mireille-dubois', name: 'Mireille Dubois',
     country: 'France', city: 'Lyon', joinedYear: 2009, followers: 11400,
-    bio: 'Mireille Dubois has shown still lifes of kitchen ephemera — peel, wax paper, spent matches — for over fifteen years, refining a narrow subject rather than widening it.',
+    bio: 'Mireille Dubois has shown still lifes of kitchen ephemera (peel, wax paper, spent matches) for over fifteen years, refining a narrow subject rather than widening it.',
     statement: 'A curator once told me to broaden my subject. Fifteen years later I am still painting what is on the counter at the end of a meal, and I have not run out yet.',
     exhibitions: [
       'Musée des Beaux-Arts de Lyon, 2010',
-      'Nature Morte, Paris — solo, 2014',
+      'Nature Morte, Paris, solo, 2014',
       'Le Comptoir, Marseille, 2019',
-      'Fifteen Years of Peel, Lyon — solo, 2024',
+      'Fifteen Years of Peel, Lyon, solo, 2024',
     ]
   },
   {
@@ -248,7 +248,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Comics taught me that you can put twelve people on a staircase and the eye will sort them out. I have never seen a reason to make a painting quieter than the street it came from.',
     exhibitions: [
       'Museo de Antioquia, Medellín, 2015',
-      'Escaleras, Bogotá — solo, 2019',
+      'Escaleras, Bogotá, solo, 2019',
       'Colour of the Andes, Quito, 2023',
     ]
   },
@@ -259,7 +259,7 @@ export const ARTISTS: Artist[] = [
     statement: 'My sitters get bored, and that is when the work starts. The first hour they are performing a face. By the third they have forgotten I am there, and I can finally paint someone.',
     exhibitions: [
       'Leipzig Academy Graduate Show, 2011',
-      'Sitters, Berlin — solo, 2016',
+      'Sitters, Berlin, solo, 2016',
       'Figurative Now, Dresden, 2020',
       'German Portrait Prize, shortlist, 2024',
     ]
@@ -271,17 +271,17 @@ export const ARTISTS: Artist[] = [
     statement: 'For a decade everything I owned had to fit in one bag, so the drawings learned to be small. I have a studio now and they have stayed small. The size turned out to be the work, not the circumstance.',
     exhibitions: [
       'Shiraz Arts Festival, 2024',
-      'In One Hand, Tehran — solo, 2026',
+      'In One Hand, Tehran, solo, 2026',
     ]
   },
   {
     id: 'a25', slug: 'oluwaseun-adebayo', name: 'Oluwaseun Adebayo',
     country: 'Nigeria', city: 'Ibadan', joinedYear: 2016, followers: 3150,
     bio: 'Oluwaseun Adebayo builds textured surfaces from layered fabric and pigment, a nod to the adire dye traditions of Ibadan reworked into abstract fields.',
-    statement: 'Adire is a resist technique — you decide where the colour will not go. I work the same way with pigment and cloth, blocking out more than I put down, so the surface is mostly refusal.',
+    statement: 'Adire is a resist technique: you decide where the colour will not go. I work the same way with pigment and cloth, blocking out more than I put down, so the surface is mostly refusal.',
     exhibitions: [
       'National Museum, Lagos, 2017',
-      'Resist, Ibadan — solo, 2020',
+      'Resist, Ibadan, solo, 2020',
       'Textile and Abstraction, Accra, 2024',
     ]
   },
@@ -292,7 +292,7 @@ export const ARTISTS: Artist[] = [
     statement: 'I was supposed to be measuring them for a thesis. I kept drawing instead, and eventually admitted the drawings were better than the measurements. The thesis was never finished.',
     exhibitions: [
       'Bunkier Sztuki, Kraków, 2019',
-      'Klatka Schodowa, Warsaw — solo, 2022',
+      'Klatka Schodowa, Warsaw, solo, 2022',
       'Polish Interiors, Wrocław, 2025',
     ]
   },
@@ -303,7 +303,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Same window, same angle, whatever happens to be standing there that year. The paintings only mean anything laid side by side, which is awkward when someone wants to buy just one, and I have never found a good answer to that.',
     exhibitions: [
       'Beirut Art Center, 2011',
-      'One Window, Beirut — solo, 2015',
+      'One Window, Beirut, solo, 2015',
       'Mediterranean Contemporary, Athens, 2019',
       'A Decade of the Corniche, Beirut, 2023',
     ]
@@ -315,7 +315,7 @@ export const ARTISTS: Artist[] = [
     statement: 'A single confident line is a lie about how looking works. I put down thirty uncertain ones instead and let the ferry emerge from the disagreement between them.',
     exhibitions: [
       'Aarhus Kunstmuseum, group show, 2014',
-      'Overlapping Lines, Copenhagen — solo, 2018',
+      'Overlapping Lines, Copenhagen, solo, 2018',
       'North Sea Drawing, Hamburg, 2022',
     ]
   },
@@ -326,7 +326,7 @@ export const ARTISTS: Artist[] = [
     statement: 'If I paint the hills in front of the hills, I get a description. Back in the studio a week later, all that survives is ochre and violet and a shape, and that is closer to what being there felt like.',
     exhibitions: [
       'Museo Caraffa, Córdoba, 2022',
-      'Sierras, Buenos Aires — solo, 2024',
+      'Sierras, Buenos Aires, solo, 2024',
       'Argentine Landscape, Rosario, 2026',
     ]
   },
@@ -337,17 +337,17 @@ export const ARTISTS: Artist[] = [
     statement: 'The boats go out at five and the light is useless by seven. Two hours is the whole painting. I chose the subject partly because it makes finishing non-negotiable.',
     exhibitions: [
       'Kisumu Museum, 2023',
-      'Dawn Boats, Nairobi — solo, 2025',
+      'Dawn Boats, Nairobi, solo, 2025',
     ]
   },
   {
     id: 'a31', slug: 'mei-lin-tan', name: 'Mei Lin Tan',
     country: 'Singapore', city: 'Singapore', joinedYear: 2015, followers: 4210,
     bio: 'Mei Lin Tan combines ink wash with digital collage, printing on rice paper to keep the softness of the traditional medium in an otherwise contemporary process.',
-    statement: 'The digital part is invisible if I have done it properly. Rice paper forgives the pixel the way it forgives the brush — everything softens at the edge, and the two processes stop arguing.',
+    statement: 'The digital part is invisible if I have done it properly. Rice paper forgives the pixel the way it forgives the brush: everything softens at the edge, and the two processes stop arguing.',
     exhibitions: [
       'Singapore Art Museum, group show, 2016',
-      'Wash and Pixel, Singapore — solo, 2019',
+      'Wash and Pixel, Singapore, solo, 2019',
       'Southeast Asian Contemporary, Bangkok, 2023',
     ]
   },
@@ -358,7 +358,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Misti is on every postcard in the city and people still buy the prints. I think it is because a carved line admits it is a translation, and a photograph pretends it is not.',
     exhibitions: [
       'Casa del Moral, Arequipa, 2012',
-      'Volcanes, Lima — solo, 2016',
+      'Volcanes, Lima, solo, 2016',
       'Andean Printmaking, La Paz, 2021',
     ]
   },
@@ -369,7 +369,7 @@ export const ARTISTS: Artist[] = [
     statement: 'The canal has barely moved in twenty years. I have. Lining the paintings up chronologically is less a record of a place than an unflattering chart of my own attention.',
     exhibitions: [
       'SMAK, Ghent, group show, 2010',
-      'Het Kanaal, Brussels — solo, 2014',
+      'Het Kanaal, Brussels, solo, 2014',
       'Low Countries Painting, Antwerp, 2019',
       'Twenty Years, One Canal, Ghent, 2025',
     ]
@@ -378,10 +378,10 @@ export const ARTISTS: Artist[] = [
     id: 'a34', slug: 'yaw-boateng', name: 'Yaw Boateng',
     country: 'Ghana', city: 'Accra', joinedYear: 2019, followers: 2540,
     bio: 'Yaw Boateng makes bold acrylic portraits of Accra market traders, painting quickly on the street and finishing details afterward from photographs.',
-    statement: 'Nobody has time to sit for me — they are running a stall. I get twenty minutes and a phone photograph, and the painting has to hold whatever I understood in those twenty minutes.',
+    statement: 'Nobody has time to sit for me. They are running a stall. I get twenty minutes and a phone photograph, and the painting has to hold whatever I understood in those twenty minutes.',
     exhibitions: [
       'Nubuke Foundation, Accra, 2020',
-      'Traders, Kumasi — solo, 2023',
+      'Traders, Kumasi, solo, 2023',
       'Portraits of West Africa, Abidjan, 2025',
     ]
   },
@@ -389,10 +389,10 @@ export const ARTISTS: Artist[] = [
     id: 'a35', slug: 'noor-al-sayed', name: 'Noor Al-Sayed',
     country: 'Egypt', city: 'Alexandria', joinedYear: 2014, followers: 3890,
     bio: 'Noor Al-Sayed paints crumbling Alexandria facades in loose watercolour, a practice she began while documenting buildings slated for demolition.',
-    statement: 'About a third of what I have painted is gone now. The looseness was practical at first — I had to work fast before the demolition crews arrived — and then it became the way I see the city.',
+    statement: 'About a third of what I have painted is gone now. The looseness was practical at first (I had to work fast before the demolition crews arrived) and then it became the way I see the city.',
     exhibitions: [
       'Bibliotheca Alexandrina, 2015',
-      'Before Demolition, Cairo — solo, 2018',
+      'Before Demolition, Cairo, solo, 2018',
       'Mediterranean Cities, Alexandria, 2022',
     ]
   },
@@ -403,7 +403,7 @@ export const ARTISTS: Artist[] = [
     statement: 'My uncle repaired pages that were six hundred years old and never signed one. He taught me hatching as a repair technique. I use it to build something instead, which he found funny.',
     exhibitions: [
       'Split City Museum, 2018',
-      'Kamen, Zagreb — solo, 2021',
+      'Kamen, Zagreb, solo, 2021',
       'Adriatic Drawing, Dubrovnik, 2024',
     ]
   },
@@ -411,10 +411,10 @@ export const ARTISTS: Artist[] = [
     id: 'a37', slug: 'consolata-mwangi', name: 'Consolata Mwangi',
     country: 'Kenya', city: 'Nairobi', joinedYear: 2020, followers: 1990,
     bio: 'Sketching during her own daily ride to the studio, Consolata Mwangi captures Nairobi matatu commuters in quick, gestural strokes.',
-    statement: 'I draw on my knees on a moving bus, so the line is never mine alone — the road puts something into every stroke. On the days the traffic is smooth the drawings are noticeably worse.',
+    statement: 'I draw on my knees on a moving bus, so the line is never mine alone: the road puts something into every stroke. On the days the traffic is smooth the drawings are noticeably worse.',
     exhibitions: [
       'Nairobi National Museum, group show, 2021',
-      'Matatu, Nairobi — solo, 2024',
+      'Matatu, Nairobi, solo, 2024',
       'East African Drawing, Kampala, 2026',
     ]
   },
@@ -425,7 +425,7 @@ export const ARTISTS: Artist[] = [
     statement: 'Midday is the worst hour to paint and I have painted nothing else for twelve years. Flat light removes every easy effect. What is left is the geometry, which was always the part I wanted.',
     exhibitions: [
       'Centro Andaluz de Arte Contemporáneo, Seville, 2013',
-      'Mediodía, Madrid — solo, 2017',
+      'Mediodía, Madrid, solo, 2017',
       'Spanish Light, Barcelona, 2022',
     ]
   },
@@ -436,7 +436,7 @@ export const ARTISTS: Artist[] = [
     statement: 'There are maybe nine colours a container can be, and I have matched all of them by hand. The paintings are abstract only because I removed the containers, not because I invented the palette.',
     exhibitions: [
       'Busan Museum of Art, 2017',
-      'Nine Colours, Seoul — solo, 2020',
+      'Nine Colours, Seoul, solo, 2020',
       'Korean Abstraction, Gwangju, 2024',
     ]
   },
@@ -447,7 +447,7 @@ export const ARTISTS: Artist[] = [
     statement: 'These buildings were drawn before they were built, and I am drawing them back. A functionalist facade is already a diagram of somebody\'s optimism; my job is mostly not to add anything.',
     exhibitions: [
       'Moravian Gallery, Brno, 2011',
-      'Funkcionalismus, Prague — solo, 2015',
+      'Funkcionalismus, Prague, solo, 2015',
       'Central European Architecture in Drawing, Vienna, 2020',
       'Brno Lines, 2024',
     ]
