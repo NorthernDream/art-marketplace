@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { ARTISTS } from './data/artists';
 import { ARTWORKS } from './data/artworks';
-import { stripComments } from './test-helpers';
+import { stripComments, sourceFiles } from './test-helpers';
 
 // 项目是 ESM，没有 __dirname，用 import.meta.url 定位
 const SRC = fileURLToPath(new URL('../', import.meta.url));
@@ -19,16 +19,6 @@ const EM_DASH_ENTITY = /&mdash;|&#8212;|&#x2014;/i;
 
 function hasEmDash(line: string): boolean {
   return line.includes(EM_DASH) || EM_DASH_ENTITY.test(line);
-}
-
-function sourceFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) out.push(...sourceFiles(path));
-    else if (/\.(astro|ts)$/.test(name) && !name.endsWith('.test.ts')) out.push(path);
-  }
-  return out;
 }
 
 describe('文案标点', () => {
@@ -54,8 +44,8 @@ describe('文案标点', () => {
 
   it('页面、组件与脚本的文案里没有 em dash（含 HTML 实体，注释除外）', () => {
     const offenders: string[] = [];
-    for (const dir of ['pages', 'components', 'layouts', 'scripts']) {
-      for (const file of sourceFiles(join(SRC, dir))) {
+    for (const dir of ['pages', 'components', 'layouts', 'scripts', 'lib']) {
+      for (const file of sourceFiles(join(SRC, dir), ['.astro', '.ts'])) {
         stripComments(readFileSync(file, 'utf8')).split('\n').forEach((line, i) => {
           if (hasEmDash(line)) offenders.push(`${file.slice(SRC.length)}:${i + 1}  ${line.trim()}`);
         });

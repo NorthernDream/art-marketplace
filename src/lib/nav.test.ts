@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { PRIMARY_NAV, FOOTER_COLUMNS, DECORATIVE_LINKS } from './nav';
-import { readdirSync, existsSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve, join } from 'node:path';
-import { stripComments } from './test-helpers';
+import { stripComments, sourceFiles } from './test-helpers';
 
 // 项目是 ESM，没有 __dirname，用 import.meta.url 定位
 const PAGES_DIR = fileURLToPath(new URL('../pages/', import.meta.url));
@@ -69,16 +69,6 @@ describe('导航', () => {
 
 const SRC = fileURLToPath(new URL('../', import.meta.url));
 
-function sourceFiles(dir: string): string[] {
-  const out: string[] = [];
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) out.push(...sourceFiles(path));
-    else if (/\.astro$/.test(name)) out.push(path);
-  }
-  return out;
-}
-
 describe('装饰性链接', () => {
   /**
    * spec §12 的验收标准：导航与页脚无死链，装饰性链接除外且必须在功能清单中列明。
@@ -87,8 +77,8 @@ describe('装饰性链接', () => {
    */
   it('组件与页面里不存在 href="#" 死链', () => {
     const offenders: string[] = [];
-    for (const dir of ['components', 'pages', 'layouts']) {
-      for (const file of sourceFiles(join(SRC, dir))) {
+    for (const dir of ['pages', 'components', 'layouts', 'scripts', 'lib']) {
+      for (const file of sourceFiles(join(SRC, dir), ['.astro', '.ts'])) {
         const body = stripComments(readFileSync(file, 'utf8'));
         if (body.includes('href="#"')) offenders.push(file.slice(SRC.length));
       }
