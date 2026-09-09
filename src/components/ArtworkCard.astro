@@ -44,7 +44,7 @@ const detailHref = `/artwork/${item.slug}`;
   <!-- DOM-last on purpose: title link must be the earlier tab stop. Grid
        placement (below) repaints this into the wall row without moving it
        here in the source, so tab order and paint order can disagree safely. -->
-  <a class="inroom" href={`${detailHref}?view=room`} aria-label={`View ${item.title} in a room`}>View in a Room</a>
+  <a class="inroom" href={`${detailHref}?view=room`} aria-label={`View in a Room: ${item.title}`}>View in a Room</a>
 </article>
 
 <style>

@@ -174,7 +174,7 @@ function buildCard(template: HTMLElement, item: CatalogItem): HTMLElement {
   const inroom = node.querySelector<HTMLAnchorElement>('.inroom');
   if (inroom) {
     inroom.setAttribute('href', `/artwork/${item.slug}?view=room`);
-    inroom.setAttribute('aria-label', `View ${item.title} in a room`);
+    inroom.setAttribute('aria-label', `View in a Room: ${item.title}`);
   }
 
   const tagline = node.querySelector<HTMLElement>('.tagline');
