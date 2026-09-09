@@ -69,8 +69,14 @@ const { categories } = Astro.props;
     font-size: 11.5px;
     color: var(--ink-3);
   }
-  .catrow .soon {
-    opacity: 0.5;
+  /* 原来用 opacity: 0.5 表达「未上线」，但 opacity 会把里面所有颜色一起压掉：
+     实测品类名降到 3.31:1、副行降到 1.94:1，两者都不达 AA，而 token 守卫查的是
+     色值、查不到合成结果。改用既有的弱化色表达同一个意思，对比度可控。 */
+  .catrow .soon b {
+    color: var(--ink-2);
+  }
+  .catrow .soon em {
+    color: var(--ink-3);
   }
 
   @media (max-width: 900px) {
