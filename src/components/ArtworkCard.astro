@@ -14,6 +14,10 @@
 // 1) 艺术家名与价格各自包在自己的 <span> 里，让脚本有现成的节点可写；
 // 2) "Curator's Pick" 无论是不是精选都渲染出来，用 hidden 切换，
 //    这样克隆出来的卡片总是带着这枚标签，不用在客户端凭空造一个。
+//
+// 心形收藏按钮已移除：Phase 1 没有状态层，spec §9 把 favorites 设计在
+// localStorage 里但 lib/store.ts 要到 Phase 3 才建。在那之前不渲染一个
+// 点了没有反应的按钮。Phase 3 恢复时连同 aria-pressed 与持久化一起做。
 import type { CatalogItem } from '../lib/catalog';
 import { placeholderColor } from '../lib/art/render';
 import { usd, dimensionsShort, editionLabel } from '../lib/format';
@@ -29,10 +33,7 @@ const detailHref = `/artwork/${item.slug}`;
 <article class="card">
   <div class="wall pbox" data-fill>
     <canvas data-artwork-id={item.id} style={`background:${placeholderColor(item)}`}></canvas>
-    <button class="heart" type="button" aria-label={`Save ${item.title}`}>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-9a4 4 0 017-2.6A4 4 0 0119 11c0 4.6-7 9-7 9z"/></svg>
-    </button>
-    <a class="inroom" href={`${detailHref}?view=room`}>View in a Room</a>
+    <a class="inroom" href={`${detailHref}?view=room`} aria-label={`View ${item.title} in a room`}>View in a Room</a>
   </div>
   <div class="meta">
     <span class="tagline" hidden={!isPick}>Curator&rsquo;s Pick</span>
@@ -70,23 +71,6 @@ const detailHref = `/artwork/${item.slug}`;
       0 1px 0 color-mix(in srgb, var(--ink) 26%, transparent),
       5px 8px 22px color-mix(in srgb, var(--ink) 20%, transparent);
   }
-  .heart {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 30px;
-    height: 30px;
-    display: grid;
-    place-items: center;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    color: var(--ink-2);
-    z-index: 2;
-  }
-  .card:hover .heart,
-  .heart:focus-visible {
-    opacity: 1;
-  }
   .inroom {
     position: absolute;
     left: 50%;
@@ -104,9 +88,27 @@ const detailHref = `/artwork/${item.slug}`;
     transition: opacity 0.15s ease;
     z-index: 2;
   }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px 高。
+     ::after 只扩点击面积，不参与布局，所以卡片排版一点不动。 */
+  .inroom::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+  }
   .card:hover .inroom,
   .inroom:focus-visible {
     opacity: 1;
+  }
+  /* 触屏没有 hover，上面那条永远不成立，入口就等于不存在。
+     指针不支持悬停时一律常显。 */
+  @media (hover: none) {
+    .inroom {
+      opacity: 1;
+    }
   }
   .meta {
     padding-top: 10px;

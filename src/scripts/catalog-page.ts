@@ -160,11 +160,11 @@ function buildCard(template: HTMLElement, item: CatalogItem): HTMLElement {
     canvas.style.background = placeholderColor(item);
   }
 
-  const heart = node.querySelector<HTMLButtonElement>('.heart');
-  heart?.setAttribute('aria-label', `Save ${item.title}`);
-
   const inroom = node.querySelector<HTMLAnchorElement>('.inroom');
-  inroom?.setAttribute('href', `/artwork/${item.slug}?view=room`);
+  if (inroom) {
+    inroom.setAttribute('href', `/artwork/${item.slug}?view=room`);
+    inroom.setAttribute('aria-label', `View ${item.title} in a room`);
+  }
 
   const tagline = node.querySelector<HTMLElement>('.tagline');
   if (tagline) tagline.hidden = item.popularity < 88;
