@@ -356,6 +356,13 @@ const COUNTRIES = countryCount();
   .sec {
     padding: 54px 0 0;
   }
+  /* 小节之间的间距一直由「下一节的顶部 54px」提供，所以 .sec 不需要底部内边距。
+     但最后一节后面是页脚，没有下一节来提供这段空隙：实测艺术家小节底边与页脚
+     顶边都是 3260px，间距为 0，正文直接顶在页脚的分隔线上。补上同样的 54px，
+     让最后一节与页脚之间保持与小节之间一致的节奏。 */
+  .sec:last-child {
+    padding-bottom: 54px;
+  }
   /* "See all" 的 .link 在 SectionHead.astro 里渲染，Astro 的作用域样式不会
      跨组件生效，所以要用 :global() 越过作用域，用 .sec 限定只影响这个宿主。
      透明热区：视觉尺寸不变，可点区域补到 44px。
@@ -472,11 +479,14 @@ const COUNTRIES = countryCount();
      会等比缩放，不会拉伸，也不需要裁剪掉画面的任何部分。
      底对齐而不是居中：四件作品因此坐在同一条基线上，像挂在同一面墙上，
      下方的图说与姓名也随之对齐。 */
+  /* 左对齐而不是居中：图说与姓名都是左对齐的，画布一居中，窄幅作品的左边缘
+     就和下面的文字对不上（实测四张里三张偏 63 到 86px，只有恰好铺满整宽的
+     那件看起来是对的）。底对齐保留，四件作品仍坐在同一条基线上。 */
   .artist .pbox {
     height: 260px;
     display: flex;
     align-items: flex-end;
-    justify-content: center;
+    justify-content: flex-start;
     margin-bottom: 10px;
   }
   /* width/height 必须带 !important：paint-grid.ts 的 paintArtwork() 用
