@@ -43,7 +43,7 @@ const catalog = buildCatalog(ARTWORKS, ARTISTS);
 const self = catalog.find((item) => item.id === artwork.id)!;
 const related = relatedWorks(catalog, self, 4);
 ---
-<Base title={`${artwork.title} — VELIN`} description={artwork.statement}>
+<Base title={`${artwork.title}: VELIN`} description={artwork.statement}>
   <div class="wrap detail" data-artwork-page>
     <p class="crumbs">
       <a href="/">Home</a> / <a href={category.href}>{category.label}</a> / {artwork.title}
@@ -72,15 +72,11 @@ const related = relatedWorks(catalog, self, 4);
           <ViewInRoom artwork={artwork} />
         </div>
 
-        <div class="about">
-          <h3>About this work</h3>
-          <p>{artwork.statement}</p>
-        </div>
       </div>
 
       <div class="dpanel">
         <span class="eyebrow">{artwork.subject} &middot; {artwork.style}</span>
-        <h2><em>{artwork.title}</em></h2>
+        <h1><em>{artwork.title}</em></h1>
         <p class="byline">by <a href={`/artist/${artist.slug}/`}>{artist.name}</a>, {artist.country}</p>
         <div class="price">
           <span class="v num">{usd(artwork.priceUsd)}</span>
@@ -117,14 +113,19 @@ const related = relatedWorks(catalog, self, 4);
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>
-            <span>14-day returns &mdash; refund if it isn&rsquo;t right on the wall</span>
+            <span>14-day returns: refund if it isn&rsquo;t right on the wall</span>
           </li>
         </ul>
       </div>
     </div>
 
+    <div class="about">
+      <h2>About this work</h2>
+      <p>{artwork.statement}</p>
+    </div>
+
     <div class="related">
-      <h3>More {artwork.subject.toLowerCase()} works</h3>
+      <h2>More {artwork.subject.toLowerCase()} works</h2>
       <ArtworkGrid items={related} />
     </div>
   </div>
@@ -176,6 +177,7 @@ const related = relatedWorks(catalog, self, 4);
     margin-bottom: 22px;
   }
   .tab {
+    position: relative;
     font-size: 11.5px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -183,6 +185,12 @@ const related = relatedWorks(catalog, self, 4);
     color: var(--ink-3);
     padding: 0 0 11px;
     border-bottom: 2px solid transparent;
+  }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，不影响 .tabs 的排版。 */
+  .tab::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px;
   }
   .tab[aria-selected='true'] {
     color: var(--ink);
@@ -207,7 +215,7 @@ const related = relatedWorks(catalog, self, 4);
     margin-top: 38px;
     max-width: 62ch;
   }
-  .about h3 {
+  .about h2 {
     font-family: var(--f-display);
     font-weight: 400;
     font-size: 20px;
@@ -223,7 +231,7 @@ const related = relatedWorks(catalog, self, 4);
     position: sticky;
     top: calc(var(--header-h) + 14px);
   }
-  .dpanel h2 {
+  .dpanel h1 {
     font-family: var(--f-display);
     font-weight: 400;
     font-size: 31px;
@@ -231,7 +239,7 @@ const related = relatedWorks(catalog, self, 4);
     margin: 6px 0 6px;
     letter-spacing: -0.01em;
   }
-  .dpanel h2 em {
+  .dpanel h1 em {
     font-family: var(--f-title);
     font-style: italic;
   }
@@ -326,7 +334,7 @@ const related = relatedWorks(catalog, self, 4);
     margin-top: 56px;
     border-top: 1px solid var(--line);
   }
-  .related h3 {
+  .related h2 {
     font-family: var(--f-display);
     font-weight: 400;
     font-size: 23px;

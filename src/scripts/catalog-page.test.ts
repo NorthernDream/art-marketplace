@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
-  parseSelectionFromSearch, parseSortFromSearch, parseQueryFromSearch, searchFromState
+  parseSelectionFromSearch, parseSortFromSearch, parseQueryFromSearch, searchFromState,
+  renderFacetsMarkup
 } from './catalog-page';
-import { buildCatalog } from '../lib/catalog';
+import { buildCatalog, FACETS } from '../lib/catalog';
 import { ARTWORKS } from '../lib/data/artworks';
 import { ARTISTS } from '../lib/data/artists';
 
@@ -113,5 +114,39 @@ describe('搜索关键词的查询串往返', () => {
     expect(parseSelectionFromSearch(search, ITEMS)).toEqual(selection);
     expect(parseSortFromSearch(search)).toBe('price-asc');
     expect(parseQueryFromSearch(search)).toBe('study');
+  });
+});
+
+describe('renderFacetsMarkup', () => {
+  it('正常集合渲染出全部八组', () => {
+    const html = renderFacetsMarkup(ITEMS, {});
+    for (const f of FACETS) {
+      expect(html.includes(f.label), `缺少分面组 ${f.label}`).toBe(true);
+    }
+  });
+
+  /**
+   * 关键词搜不到东西时 scoped() 为空：六个从 items 推取值的分面会返回空数组，
+   * 只剩一个 <span class="eyebrow"> 标题；size 与 price 走固定顺序，
+   * 仍会渲染出全零且禁用的一长串。页面上就是一列光秃秃的标题，像坏了。
+   */
+  it('空集合不渲染任何只剩标题的空组', () => {
+    const html = renderFacetsMarkup([], {});
+    for (const f of FACETS) {
+      expect(html.includes(f.label), `空集合不该渲染分面组 ${f.label}`).toBe(false);
+    }
+  });
+
+  it('空集合给出一句可读的说明，而不是什么都不给', () => {
+    const html = renderFacetsMarkup([], {});
+    expect(html.includes('fempty')).toBe(true);
+    expect(html.trim().length).toBeGreaterThan(30);
+  });
+
+  it('按分面筛到 0 件时分面照常渲染，用户才能取消筛选', () => {
+    // scoped() 只按关键词收窄，分面筛选不影响它，所以 items 仍非空
+    const html = renderFacetsMarkup(ITEMS, { subject: ['Abstract'], color: ['Red'] });
+    expect(html.includes('Subject')).toBe(true);
+    expect(html.includes('Colour')).toBe(true);
   });
 });

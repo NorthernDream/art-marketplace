@@ -30,7 +30,9 @@ const dataJson = JSON.stringify(items).replace(/</g, '\\u003c');
 ---
 <div class="wrap">
   <div class="chead">
-    <p class="crumbs"><a href="/">Home</a> / <a href="/">Art</a> / {title}</p>
+    {/* Art 原来 href="/"，和 Home 落到同一个地方，等于一条标错名字的重复链接。
+        站内没有 /art 页面，也不该为面包屑造一个，所以它就是一段纯文本。 */}
+    <p class="crumbs"><a href="/">Home</a> / Art / {title}</p>
     <h1>{title}</h1>
     <p>{blurb}</p>
   </div>
@@ -103,7 +105,7 @@ const dataJson = JSON.stringify(items).replace(/</g, '\\u003c');
     color: var(--ink-2);
     width: 100%;
   }
-  .empty h3 {
+  .empty h2 {
     font-family: var(--f-display);
     font-weight: 400;
     font-size: 24px;

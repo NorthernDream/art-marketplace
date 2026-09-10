@@ -44,7 +44,10 @@ img{max-width:100%}
 .btn.solid:hover{background:var(--accent);border-color:var(--accent)}
 
 /* 页面抬头：品类页与 Coming soon 页共用 .chead，面包屑 .crumbs 详情页也在用。 */
-.crumbs{font-size:11.5px;color:var(--ink-3);margin-bottom:14px}
+/* .chead p 的特异性(0,1,1)本来压过 .crumbs(0,1,0)，品类页与 Coming soon 页的
+   面包屑因此渲染成 14.5px/--ink-2，而详情页是 11.5px/--ink-3，同一个元素两副样子。
+   .crumbs.crumbs 把特异性提到 (0,2,0)，压过 .chead p，不必改动任何页面的标记。 */
+.crumbs,.crumbs.crumbs{font-size:11.5px;color:var(--ink-3);margin-bottom:14px}
 .crumbs a:hover{color:var(--ink);text-decoration:underline}
 .chead{padding:38px 0 26px;border-bottom:1px solid var(--line)}
 .chead h1{

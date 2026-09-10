@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { PRIMARY_NAV, FOOTER_COLUMNS } from './nav';
-import { readdirSync, existsSync } from 'node:fs';
+import { PRIMARY_NAV, FOOTER_COLUMNS, DECORATIVE_LINKS } from './nav';
+import { readdirSync, existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
+import { stripComments, sourceFiles } from './test-helpers';
 
 // 项目是 ESM，没有 __dirname，用 import.meta.url 定位
 const PAGES_DIR = fileURLToPath(new URL('../pages/', import.meta.url));
@@ -63,5 +64,54 @@ describe('导航', () => {
 
   it('pages 目录下确实存在 astro 页面', () => {
     expect(readdirSync(PAGES_DIR).some(f => f.endsWith('.astro'))).toBe(true);
+  });
+});
+
+const SRC = fileURLToPath(new URL('../', import.meta.url));
+
+describe('装饰性链接', () => {
+  /**
+   * spec §12 的验收标准：导航与页脚无死链，装饰性链接除外且必须在功能清单中列明。
+   * href="#" 是「看起来能点、点了什么都不发生」，它既不是真链接也没在任何地方
+   * 交代过。本轮把这类元素一律改成非链接，并在 DECORATIVE_LINKS 里记账。
+   */
+  it('组件与页面里不存在 href="#" 死链', () => {
+    const offenders: string[] = [];
+    for (const dir of ['pages', 'components', 'layouts', 'scripts', 'lib']) {
+      for (const file of sourceFiles(join(SRC, dir), ['.astro', '.ts'])) {
+        const body = stripComments(readFileSync(file, 'utf8'));
+        if (body.includes('href="#"')) offenders.push(file.slice(SRC.length));
+      }
+    }
+    expect(offenders, `以下文件仍有 href="#"：${offenders.join(', ')}`).toEqual([]);
+  });
+
+  it('清单非空，且每条都写明了出处、标签与归属阶段', () => {
+    expect(DECORATIVE_LINKS.length).toBeGreaterThan(0);
+    for (const d of DECORATIVE_LINKS) {
+      expect(d.where.length, '缺少出处').toBeGreaterThan(0);
+      expect(d.label.length, '缺少标签').toBeGreaterThan(0);
+      expect([3, 4], `${d.label} 的归属阶段不合法`).toContain(d.plannedPhase);
+    }
+  });
+
+  it('清单里的每条都能在它声明的组件里落地', () => {
+    for (const d of DECORATIVE_LINKS) {
+      const file = join(SRC, 'components', `${d.where}.astro`);
+      expect(existsSync(file), `${d.where}.astro 不存在`).toBe(true);
+      // 注释里出现不算数，所以先剥注释：否则把标签写进注释的组件也能过，
+      // 那时守卫盯的是注释而不是渲染结果。
+      const body = stripComments(readFileSync(file, 'utf8'));
+      // 两种落地方式都算数：
+      // 1) 标签字面写在标记里（SiteHeader 的三个图标）
+      // 2) 组件消费 DECORATIVE_LINKS 自己渲染（SiteFooter 的三条法务链接）
+      //    这种情况下标签必然与清单一致，因为它就是从清单取的。
+      const literal = body.includes(d.label);
+      const fromManifest = body.includes('DECORATIVE_LINKS');
+      expect(
+        literal || fromManifest,
+        `${d.where}.astro 既没有字面量 ${d.label}，也没有消费 DECORATIVE_LINKS`
+      ).toBe(true);
+    }
   });
 });

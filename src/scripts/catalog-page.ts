@@ -95,6 +95,15 @@ export function searchFromState(selection: Selection, sort: SortKey, query = '')
 
 /** 渲染八组分面（含互斥自身维度的计数），供首屏与每次交互复用 */
 export function renderFacetsMarkup(items: CatalogItem[], sel: Selection): string {
+  // 关键词搜不到东西时 items 为空：六个从 items 推取值的分面会退化成只剩标题，
+  // size/price 走固定顺序则渲染出一长串全零禁用项，页面上是一列空标题，像坏了。
+  // 注意判据是 items 为空，不是结果数为 0——按分面筛到 0 件时 items 仍非空，
+  // 那时分面必须照常渲染，否则用户没法取消自己刚加的筛选。
+  if (!items.length) {
+    return `<div class="fgroup fempty"><span class="eyebrow">Filters</span>` +
+      `<p>Nothing matches this search, so there is nothing left to narrow.</p></div>`;
+  }
+
   return FACETS.map((f) => {
     const counts = facetCounts(items, sel, f.key);
     const values = valuesForFacet(f.key, items);
@@ -115,6 +124,8 @@ export function renderFacetsMarkup(items: CatalogItem[], sel: Selection): string
       </label>`;
       })
       .join('');
+    // 某组一个可选值都没有时整组不渲染，别留一个光秃秃的标题
+    if (!rows) return '';
     return `<div class="fgroup"><span class="eyebrow">${escapeText(f.label)}</span>${rows}</div>`;
   }).join('');
 }
@@ -160,11 +171,11 @@ function buildCard(template: HTMLElement, item: CatalogItem): HTMLElement {
     canvas.style.background = placeholderColor(item);
   }
 
-  const heart = node.querySelector<HTMLButtonElement>('.heart');
-  heart?.setAttribute('aria-label', `Save ${item.title}`);
-
   const inroom = node.querySelector<HTMLAnchorElement>('.inroom');
-  inroom?.setAttribute('href', `/artwork/${item.slug}?view=room`);
+  if (inroom) {
+    inroom.setAttribute('href', `/artwork/${item.slug}?view=room`);
+    inroom.setAttribute('aria-label', `View in a Room: ${item.title}`);
+  }
 
   const tagline = node.querySelector<HTMLElement>('.tagline');
   if (tagline) tagline.hidden = item.popularity < 88;
@@ -346,7 +357,7 @@ export function initCatalogPage(items: CatalogItem[]): void {
       const [heading, hint] = state.query
         ? [`No works match &ldquo;${escapeText(state.query)}&rdquo;`, 'Try a different word, or clear the search.']
         : ['No works match those filters', 'Try removing a filter, or widening your selection.'];
-      moreHost!.innerHTML = `<div class="empty"><h3>${heading}</h3><p>${hint}</p></div>`;
+      moreHost!.innerHTML = `<div class="empty"><h2>${heading}</h2><p>${hint}</p></div>`;
       return;
     }
 
@@ -529,6 +540,9 @@ export function initCatalogPage(items: CatalogItem[]): void {
   });
 
   filterToggle?.addEventListener('click', () => {
-    facetsHost.classList.toggle('open');
+    const open = facetsHost.classList.toggle('open');
+    // 同组件的 #sortTrigger 一直有 aria-expanded，Filters 漏了：
+    // 展开状态不对辅助技术暴露，屏幕阅读器读不出面板是开是关。
+    filterToggle.setAttribute('aria-expanded', String(open));
   });
 }

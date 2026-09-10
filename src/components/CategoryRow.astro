@@ -44,9 +44,14 @@ const { categories } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 5px;
-    padding: 20px 18px 20px 0;
+    /* 左右对称，让文字离开分隔线。首格例外：它要和上方的小节标题对齐在同一条
+       版心线上，多出 18px 会显得是排版失误。 */
+    padding: 20px 18px;
     border-bottom: 1px solid var(--line);
     border-right: 1px solid var(--line-2);
+  }
+  .catrow > :first-child {
+    padding-left: 0;
   }
   .catrow > :last-child {
     border-right: 0;
@@ -64,8 +69,14 @@ const { categories } = Astro.props;
     font-size: 11.5px;
     color: var(--ink-3);
   }
-  .catrow .soon {
-    opacity: 0.5;
+  /* 原来用 opacity: 0.5 表达「未上线」，但 opacity 会把里面所有颜色一起压掉：
+     实测品类名降到 3.31:1、副行降到 1.94:1，两者都不达 AA，而 token 守卫查的是
+     色值、查不到合成结果。改用既有的弱化色表达同一个意思，对比度可控。 */
+  .catrow .soon b {
+    color: var(--ink-2);
+  }
+  .catrow .soon em {
+    color: var(--ink-3);
   }
 
   @media (max-width: 900px) {
@@ -74,6 +85,12 @@ const { categories } = Astro.props;
     }
     .catrow > :nth-child(2n) {
       border-right: 0;
+    }
+    /* 两列布局下每行的领头格都要贴齐左侧版心线，不只是整个网格的第一个格：
+       :first-child 只覆盖第一行第一格，第二行开头（第三格）仍会带着 18px
+       的左内距，读起来和第一行不对齐。 */
+    .catrow > :nth-child(2n+1) {
+      padding-left: 0;
     }
   }
 </style>

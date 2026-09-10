@@ -1,12 +1,12 @@
 ---
-// 迁移自原型 cardHTML()：一张卡片 = 挂画区（画布 + 收藏 + 一键看房）+ 信息区。
+// 迁移自原型 cardHTML()：一张卡片 = 挂画区（画布 + 一键看房）+ 信息区。
 //
 // 与原型的一处刻意偏差：原型把整张卡片包在 <a class="card"> 里，同时把 "View in
 // a Room" 也做成 <a class="inroom">。HTML 不允许一个 <a> 嵌套在另一个未闭合的
 // <a> 里——解析器会用"adoption agency"算法提前把外层 <a> 关闭，导致挂画区之后
 // 的信息区(.meta)反而不在任何链接里，"整卡可点"就假了。这里改用"伸展链接"手
 // 法：外层用 <article>，真正的 <a> 只挂在标题上，再用 ::after 把它的可点区域
-// 撑满整张卡片；收藏按钮与"看房"链接各自设更高的 z-index，保证悬浮态下仍可点。
+// 撑满整张卡片；"看房"链接设更高的 z-index，保证悬浮态下仍可点。
 //
 // 与 catalog-page.ts 的 buildCard 有一份约定：客户端筛选/排序/翻页时会克隆这份
 // 标记再填数据，只允许改 textContent、不允许新建元素——新建的节点拿不到 Astro
@@ -14,6 +14,10 @@
 // 1) 艺术家名与价格各自包在自己的 <span> 里，让脚本有现成的节点可写；
 // 2) "Curator's Pick" 无论是不是精选都渲染出来，用 hidden 切换，
 //    这样克隆出来的卡片总是带着这枚标签，不用在客户端凭空造一个。
+//
+// 心形收藏按钮已移除：Phase 1 没有状态层，spec §9 把 favorites 设计在
+// localStorage 里但 lib/store.ts 要到 Phase 3 才建。在那之前不渲染一个
+// 点了没有反应的按钮。Phase 3 恢复时连同 aria-pressed 与持久化一起做。
 import type { CatalogItem } from '../lib/catalog';
 import { placeholderColor } from '../lib/art/render';
 import { usd, dimensionsShort, editionLabel } from '../lib/format';
@@ -29,10 +33,6 @@ const detailHref = `/artwork/${item.slug}`;
 <article class="card">
   <div class="wall pbox" data-fill>
     <canvas data-artwork-id={item.id} style={`background:${placeholderColor(item)}`}></canvas>
-    <button class="heart" type="button" aria-label={`Save ${item.title}`}>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-7-9a4 4 0 017-2.6A4 4 0 0119 11c0 4.6-7 9-7 9z"/></svg>
-    </button>
-    <a class="inroom" href={`${detailHref}?view=room`}>View in a Room</a>
   </div>
   <div class="meta">
     <span class="tagline" hidden={!isPick}>Curator&rsquo;s Pick</span>
@@ -41,13 +41,28 @@ const detailHref = `/artwork/${item.slug}`;
     <p class="d num">{dimensionsShort(item.widthIn, item.heightIn)} &middot; {item.medium}</p>
     <p class="p num"><span>{usd(item.priceUsd)}</span><small>{editionLabel(item.edition)}</small></p>
   </div>
+  <!-- DOM-last on purpose: title link must be the earlier tab stop. Grid
+       placement (below) repaints this into the wall row without moving it
+       here in the source, so tab order and paint order can disagree safely. -->
+  <a class="inroom" href={`${detailHref}?view=room`} aria-label={`View in a Room: ${item.title}`}>View in a Room</a>
 </article>
 
 <style>
+  /* 两行网格取代原来的 flex column：.inroom 在 DOM 里排到 .meta 之后（让键盘
+     先到标题再到看房链接），但视觉上仍要落在挂画区底边。网格允许"放进第一行"
+     和"排在最后"互不相干——.wall 与 .inroom 都显式落在第 1 行，靠 grid-row
+     叠在同一个格子里，.meta 落在第 2 行。这样只改视觉位置、不改 DOM 位置，
+     不必再靠 .wall 的 position:relative 当 .inroom 的定位参照系。 */
   .card {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    /* 必须显式声明列，且用 minmax(0, 1fr)：只写 grid-template-rows 时隐式列按
+       auto 定尺、向 max-content 靠，会被 .inroom 之类的内容撑过卡片自身的宽度。
+       实测 390px 下卡片本身 163px，而隐式列被撑到 300px，paintGrid 于是往
+       163px 的格子里画了 300px 的画布，整页横向滚动 114px。
+       minmax(0, 1fr) 允许列收缩到内容宽度以下，这是网格项溢出的标准解法。 */
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
     text-align: left;
     width: 100%;
   }
@@ -55,8 +70,9 @@ const detailHref = `/artwork/${item.slug}`;
      不再固定高度——固定高度会把所有卡片拉齐，那就退回普通网格了。
      真实相对比例改在详情页与 View in a Room 里表达（那里有沙发作参照）。 */
   .wall {
-    position: relative;
     display: block;
+    grid-row: 1;
+    grid-column: 1;
   }
   .wall canvas {
     display: block;
@@ -70,28 +86,13 @@ const detailHref = `/artwork/${item.slug}`;
       0 1px 0 color-mix(in srgb, var(--ink) 26%, transparent),
       5px 8px 22px color-mix(in srgb, var(--ink) 20%, transparent);
   }
-  .heart {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 30px;
-    height: 30px;
-    display: grid;
-    place-items: center;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    color: var(--ink-2);
-    z-index: 2;
-  }
-  .card:hover .heart,
-  .heart:focus-visible {
-    opacity: 1;
-  }
   .inroom {
-    position: absolute;
-    left: 50%;
-    bottom: -2px;
-    transform: translateX(-50%);
+    position: relative;
+    grid-row: 1;
+    grid-column: 1;
+    align-self: end;
+    justify-self: center;
+    margin-bottom: -2px;
     background: var(--surface);
     border: 1px solid var(--ink);
     font-size: 11px;
@@ -104,11 +105,31 @@ const detailHref = `/artwork/${item.slug}`;
     transition: opacity 0.15s ease;
     z-index: 2;
   }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px 高。
+     ::after 只扩点击面积，不参与布局，所以卡片排版一点不动。 */
+  .inroom::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 44px;
+  }
   .card:hover .inroom,
   .inroom:focus-visible {
     opacity: 1;
   }
+  /* 触屏没有 hover，上面那条永远不成立，入口就等于不存在。
+     指针不支持悬停时一律常显。 */
+  @media (hover: none) {
+    .inroom {
+      opacity: 1;
+    }
+  }
   .meta {
+    grid-row: 2;
+    grid-column: 1;
     padding-top: 10px;
     border-top: 1px solid var(--line-2);
     margin-top: 8px;

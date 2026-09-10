@@ -37,7 +37,7 @@ const yearRange =
     : `${facts.earliestYear}–${facts.latestYear}`;
 ---
 <Base
-  title={`${artist.name} — VELIN`}
+  title={`${artist.name}: VELIN`}
   description={`Original works by ${artist.name}, ${artist.city}, ${artist.country}.`}
 >
   <div class="wrap profile">
@@ -81,7 +81,7 @@ const yearRange =
       </aside>
     </div>
 
-    <section class="works">
+    <section class="works" style={`--works-cols:${Math.min(facts.workCount, 4)}`}>
       <h2>
         Works by {artist.name}
         <span class="count num">{facts.workCount}</span>
@@ -100,7 +100,7 @@ const yearRange =
   let timer: number | undefined;
   btn?.addEventListener('click', () => {
     if (!toast) return;
-    toast.textContent = 'Following — you’ll hear when new work is listed';
+    toast.textContent = 'Following is not live in this prototype yet';
     toast.classList.add('on');
     window.clearTimeout(timer);
     timer = window.setTimeout(() => toast.classList.remove('on'), 2400);
@@ -231,6 +231,19 @@ const yearRange =
     font-family: var(--f-ui);
     font-size: 12px;
     color: var(--ink-3);
+  }
+  /* ArtworkGrid 用 auto-fill，空轨道会被保留：1 件作品就孤占第一格、
+     右边空三格。41 位艺术家里多数只有 1 到 4 件，这是常态不是边缘情况。
+     按作品数把网格整体收窄，让它们填满一行；4 件及以上维持原样。
+     330px = 300px 最小列宽 + 30px column-gap。 */
+  .works :global(.grid) {
+    max-width: calc(var(--works-cols) * 330px);
+  }
+  @media (max-width: 900px) {
+    /* 窄屏列宽变成 240px，且本来就放不下四列，解除约束交给 auto-fill */
+    .works :global(.grid) {
+      max-width: none;
+    }
   }
 
   #toast {

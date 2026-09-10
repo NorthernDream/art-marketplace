@@ -12,10 +12,10 @@ const FALLBACK_GAP = 44;
  * 把 root 范围内的作品画布画出来。
  *
  * 两种定尺方式：
- * - `.pbox[data-fill]`（列表页卡片）：画布撑满容器宽度，高度由作品长宽比决定，
- *   卡片高度随之而变——这是瀑布流成立的前提。
- * - 其余 `.pbox`（首页主视觉、艺术家小图等固定框）：走 displaySize，
- *   按真实尺寸的相对比例缩放，装进固定框里。
+ * - `.pbox[data-fill]`（列表页卡片、首页艺术家小图）：画布撑满容器宽度，
+ *   高度由作品长宽比决定，卡片高度随之而变——这是瀑布流成立的前提。
+ * - 其余 `.pbox`（目前只有首页主视觉）：走 displaySize，按真实尺寸的
+ *   相对比例缩放，装进固定框里。
  */
 export function paintGrid(root: ParentNode = document): void {
   const canvases = root.querySelectorAll<HTMLCanvasElement>('canvas[data-artwork-id]');

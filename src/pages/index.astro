@@ -12,6 +12,7 @@ import type { CatalogItem, Selection } from '../lib/catalog';
 import { PRIMARY_NAV } from '../lib/nav';
 import { dimensions } from '../lib/format';
 import { placeholderColor } from '../lib/art/render';
+import { countryCount } from '../lib/artist';
 
 const CATALOG: CatalogItem[] = buildCatalog(ARTWORKS, ARTISTS);
 const PAINTINGS: CatalogItem[] = CATALOG.filter((item) => item.category === 'painting');
@@ -83,7 +84,7 @@ const COLLECTIONS: { name: string; blurb: string; base: string; catalog: Catalog
   },
   {
     name: 'First Purchases',
-    blurb: 'Original prints under $1,000 — an easy, low-risk way to start collecting.',
+    blurb: 'Original prints under $1,000. An easy, low-risk way to start collecting.',
     base: '/prints',
     catalog: PRINTS,
     selection: AFFORDABLE_SELECTION
@@ -118,17 +119,23 @@ const priceBands = PRICE_ORDER.map((band) => ({
 // 它的艺术家（a16）也不在精选那四件里。----------
 const FEATURED_ARTIST_WORK_IDS = ['w022', 'w017', 'w025', 'w032'];
 const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
+
+// 全站其他数字都从目录现算，这一处原来写死成 84，而数据里只有 35。
+const COUNTRIES = countryCount();
 ---
-<Base title="VELIN — Original Art, Direct From the Studio" description="Paintings by independent artists in 84 countries — each one an original, priced by the artist who made it.">
+<Base
+  title="VELIN: Original Art, Direct From the Studio"
+  description={`Paintings by independent artists in ${COUNTRIES} countries. Each one an original, priced by the artist who made it.`}
+>
   <div class="wrap">
     <section class="hero">
       <div>
         <span class="eyebrow">Original art, direct from the studio</span>
         <h1>Every wall deserves something <em>no one else has.</em></h1>
         <p>
-          Paintings by independent artists in 84 countries — each one an original, priced by the
-          artist who made it, shipped with a certificate of authenticity and 14 days to change
-          your mind.
+          Paintings by independent artists in {COUNTRIES} countries. Each one an original,
+          priced by the artist who made it, shipped with a certificate of authenticity
+          and 14 days to change your mind.
         </p>
         <div class="cta">
           <a class="btn solid" href="/paintings">Browse Paintings</a>
@@ -186,7 +193,7 @@ const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
         <h2>See how big it really is, before it arrives.</h2>
         <p>
           Every work can be placed on a wall at true scale, measured against a standard
-          three-seat sofa. What you see is the actual size relationship — not an illustration.
+          three-seat sofa. What you see is the actual size relationship, not an illustration.
         </p>
         <a class="btn" href={`/artwork/${roomArt.slug}?view=room`}>Try it on this work</a>
       </div>
@@ -220,15 +227,21 @@ const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
       <SectionHead title="Artists to follow" />
       <!-- 同样是 data-artwork-id + .pbox 的约定，画布由下面 Curator's picks 那次
            文档级 paintGrid() 一起画出来。
-           卡片指向艺术家主页而不是那件作品——这一栏推的是人，不是画。 -->
+           卡片指向艺术家主页而不是那件作品——这一栏推的是人，不是画。
+           .pbox 用 data-fill 而不是 data-pad：与 ArtworkCard 的 .wall 同一种定尺法，
+           画布填满卡片宽度，高度按长宽比换算，不再走 displaySize 的真实相对缩放
+           （原来 152px 的固定框配小尺寸原作，画布实测只有 52×86px，几乎看不见）。
+           画作标题直接标在图片下方作图说，避免这张画被当成艺术家本人的头像；
+           艺术家名的字号盖过图说，因为这是艺术家卡片，人才是主体。 -->
       <div class="artists">
         {featuredArtists.map((item) => (
           <a class="artist" href={`/artist/${artistById(item.artistId)!.slug}/`}>
-            <span class="pbox" data-pad="18">
+            <span class="pbox" data-fill>
               <canvas data-artwork-id={item.id} style={`background:${placeholderColor(item)}`}></canvas>
             </span>
+            <span class="cap"><em>{item.title}</em>, {item.year}</span>
             <b>{item.artistName}</b>
-            <em>{item.country} &middot; {item.style}</em>
+            <em class="loc">{item.country} &middot; {item.style}</em>
           </a>
         ))}
       </div>
@@ -343,6 +356,24 @@ const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
   .sec {
     padding: 54px 0 0;
   }
+  /* 小节之间的间距一直由「下一节的顶部 54px」提供，所以 .sec 不需要底部内边距。
+     但最后一节后面是页脚，没有下一节来提供这段空隙：实测艺术家小节底边与页脚
+     顶边都是 3260px，间距为 0，正文直接顶在页脚的分隔线上。补上同样的 54px，
+     让最后一节与页脚之间保持与小节之间一致的节奏。 */
+  .sec:last-child {
+    padding-bottom: 54px;
+  }
+  /* "See all" 的 .link 在 SectionHead.astro 里渲染，Astro 的作用域样式不会
+     跨组件生效，所以要用 :global() 越过作用域，用 .sec 限定只影响这个宿主。
+     透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，不影响 .sechead 的排版。 */
+  .sec :global(.link) {
+    position: relative;
+  }
+  .sec :global(.link)::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px;
+  }
 
   .roomband {
     display: grid;
@@ -407,10 +438,17 @@ const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
     margin-top: 20px;
   }
   .pricerow a {
+    position: relative;
     border: 1px solid var(--line);
     background: var(--surface);
     padding: 9px 16px;
     font-size: 12.5px;
+  }
+  /* 透明热区：视觉尺寸不变，可点区域补到 44px。
+     ::after 绝对定位、不参与布局，不影响 .pricerow 的排版。 */
+  .pricerow a::after {
+    content: ''; position: absolute; left: 0; right: 0;
+    top: 50%; transform: translateY(-50%); height: 44px;
   }
   .pricerow a:hover {
     border-color: var(--ink);
@@ -423,31 +461,67 @@ const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 26px;
+    /* .pbox 现在是统一高度（见下方注释），但图说与艺术家名仍是各自独立换行
+       的文字——标题长一点、名字带连字符换行，都会让某张卡片比其他几张多占
+       一行。不设 start 的话网格默认拉伸每张卡片去填满整行里最高的那一张，
+       矮一行的卡片下方会空出一截。 */
+    align-items: start;
   }
   .artist {
     display: block;
     text-align: left;
   }
+  /* 与 ArtworkCard 的 .wall 同一种定尺法（data-fill）：画布仍按卡片宽度全宽
+     绘制，不再是配 var(--wall) 背景色、居中摆放小画的固定 152px 展示框。
+     四件作品长宽比差得很远（实测画布高 246px 到 548px），直接按比例铺开会让
+     四张卡片高度乱跳、艺术家名落在四个不同高度上。给图片区一个统一高度，
+     画布按内在比例缩到框内：canvas 是替换元素，max-height 配 height:auto
+     会等比缩放，不会拉伸，也不需要裁剪掉画面的任何部分。
+     底对齐而不是居中：四件作品因此坐在同一条基线上，像挂在同一面墙上，
+     下方的图说与姓名也随之对齐。 */
+  /* 左对齐而不是居中：图说与姓名都是左对齐的，画布一居中，窄幅作品的左边缘
+     就和下面的文字对不上（实测四张里三张偏 63 到 86px，只有恰好铺满整宽的
+     那件看起来是对的）。底对齐保留，四件作品仍坐在同一条基线上。 */
   .artist .pbox {
-    height: 152px;
-    background: var(--wall);
+    height: 260px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
+    align-items: flex-end;
+    justify-content: flex-start;
+    margin-bottom: 10px;
   }
+  /* width/height 必须带 !important：paint-grid.ts 的 paintArtwork() 用
+     canvas.style.width / .height 内联设置绘制尺寸（这是保证高分屏画布够清晰
+     所必须的，data-fill 本身不变，没有新开一条定尺路径）。内联样式的优先级
+     天生盖过样式表里同名属性，这里的 width/height: auto 不加 !important
+     根本不会生效——max-height 会单独把 height 压下去，width 停在内联设置的
+     原值不变，画面被压扁。已用无头 Chrome 实测验证：不加 !important 时
+     328×547 的画布被压成 328×260（比例从 0.60 变成 1.26，明显失真）；
+     加上之后渲染为 156×260，比例仍是 0.60，与画布本身的宽高比对上。 */
   .artist .pbox canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto !important;
+    height: auto !important;
     box-shadow:
       0 1px 0 color-mix(in srgb, var(--ink) 24%, transparent),
       4px 6px 14px color-mix(in srgb, var(--ink) 18%, transparent);
   }
+  /* 图说：标出画布里是哪件作品、哪一年，让它读成"配了图说的作品"而不是
+     一张没有说明的头像。 */
+  .artist .cap {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
   .artist b {
     display: block;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 600;
     margin-bottom: 2px;
   }
-  .artist em {
+  .artist em.loc {
     font-style: normal;
     font-size: 12px;
     color: var(--ink-2);
@@ -474,6 +548,15 @@ const featuredArtists = FEATURED_ARTIST_WORK_IDS.map(itemById);
     }
     .colls {
       grid-template-columns: minmax(0, 1fr);
+    }
+    /* .artists 在这个断点变两列，卡片本身也变窄；到 390px 时窄至约 150px，
+       固定 260px 的图片区配上横向作品（w017，16:12）会在图片上方空出
+       半个框高的空白（实测约 147px，占框高 56%）。缩到 200px 之后同一件
+       作品的空白降到约 47px（约 24%），其余三件竖长作品在两个宽度下都仍是
+       "按高度铺满"，不受影响。这里沿用 .herowall 在同一个断点下的既有比例
+       （330/432≈0.76）反推出来，不是拍脑袋的数字。 */
+    .artist .pbox {
+      height: 200px;
     }
   }
 </style>

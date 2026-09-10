@@ -53,3 +53,8 @@ export function artistFacts(artistId: string): ArtistFacts | undefined {
     latestYear: Math.max(...years)
   };
 }
+
+/** 目录里不重复的艺术家国别数。首页 hero 用它，不写死数字。 */
+export function countryCount(): number {
+  return new Set(ARTISTS.map((a) => a.country)).size;
+}

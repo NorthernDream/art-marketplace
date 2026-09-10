@@ -66,7 +66,7 @@ const html = renderFacetsMarkup(items, {});
     appearance: none;
     width: 13px;
     height: 13px;
-    border: 1px solid var(--ink-3);
+    border: 1px solid var(--line-strong);
     border-radius: 1px;
     flex: none;
     background: var(--surface);
@@ -101,12 +101,27 @@ const html = renderFacetsMarkup(items, {});
     opacity: 0.38;
     pointer-events: none;
   }
+  .fempty p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ink-2);
+    max-width: 30ch;
+  }
   .sw {
     width: 13px;
     height: 13px;
     flex: none;
     border: 1px solid color-mix(in srgb, var(--ink) 16%, transparent);
     border-radius: 50%;
+  }
+
+  /* 鼠标有像素级精度，28px 行高在桌面是合适的密度，且已满足 WCAG 2.5.8 AA 的 24×24。
+     触屏没有这个精度，指针不支持悬停时把行高抬到 44px，代价是筛选栏更长，
+     但它本来就是可滚动的折叠面板。 */
+  @media (hover: none) {
+    .opt {
+      min-height: 44px;
+    }
   }
 
   @media (max-width: 900px) {

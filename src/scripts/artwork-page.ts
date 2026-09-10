@@ -138,10 +138,12 @@ export function initArtworkPage(artwork: Artwork): void {
   });
 
   // Phase 1 没有状态层：Add to Cart / Make an Offer 只弹 toast，不写购物车状态。
+  // 文案必须说清这一点——原来写的是「已加入购物车」「报价已发出」，
+  // 而购物车徽标恒为 0、也没有任何报价发出去，等于给用户一个假回执。
   root.querySelector('#addCart')?.addEventListener('click', () => {
-    toast(`“${artwork.title}” added to cart`);
+    toast('Checkout is not live in this prototype yet');
   });
   root.querySelector('#offer')?.addEventListener('click', () => {
-    toast('Offer sent to the artist — they usually reply within 48 hours');
+    toast('Offers are not live in this prototype yet');
   });
 }
